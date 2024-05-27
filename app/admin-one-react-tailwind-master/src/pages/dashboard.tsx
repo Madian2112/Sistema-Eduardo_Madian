@@ -67,7 +67,7 @@ const DashboardPage = () => {
             icon={mdiAccountMultiple}
             iconColor="success"
             number={512}
-            label="Clients"
+            label="test"
           />
           <CardBoxWidget
             trendLabel="16%"
