@@ -7,9 +7,11 @@ import {
   mdiMonitorCellphone,
   mdiReload,
 } from '@mdi/js'
+import { Field, Form, Formik } from 'formik'
+import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js'
 import Head from 'next/head'
 import React, { useState } from 'react'
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'primereact/dialog'
 import type { ReactElement } from 'react'
 import Button from '../components/Button'
 import LayoutAuthenticated from '../layouts/Authenticated'
@@ -28,38 +30,87 @@ import NotificationBar from '../components/NotificationBar'
 import TableSampleClients from '../components/Table/SampleClients'
 import { getPageTitle } from '../config'
 
+import { mdiEye, mdiTrashCan } from '@mdi/js'
+import CardBoxModal from '../components/CardBox/Modal'
+import FormField from '../components/Form/Field'
+import Divider from '../components/Divider'
+import Buttons from '../components/Buttons'
 const DepartamentoPage = () => {
-  const visible = false
+  const [visible, setVisible] = useState(false)
+  const [isModalInfoActive, setIsModalInfoActive] = useState(false);
+
+  const handleModalAction = () => {
+    setIsModalInfoActive(false);
+  }
+
+  const Mostrar = (values) => {
+    alert(JSON.stringify(values, null, 2));
+  }
   return (
     <>
+      <Button label="Open Modal" onClick={() => setIsModalInfoActive(true)} />
+
+<CardBoxModal
+  title="Agregar"
+  buttonColor="info"
+  buttonLabel="Agregar"
+  isActive={isModalInfoActive}
+  onConfirm={handleModalAction}
+  onCancel={handleModalAction}
+>
+  <Formik
+    initialValues={{
+      name: 'Iphone',
+      year: '',
+      CPU_model: '',
+      price: '',
+      Hard_disk_size: '',
+    }}
+    onSubmit={(values) => {
+      Mostrar(values);
+    }}
+  >
+
+      <Form>
+        <FormField>
+          <Field name="name" placeholder="Nombre" />
+          <Field type="date" name="year" placeholder="Año" />
+        </FormField>
+
+        <FormField>
+          <Field name="price" placeholder="Precio" />
+          <Field type="text" name="CPU_model" placeholder="CPU modelo" />
+        </FormField>
+        <FormField>
+          <Field name="price" placeholder="Precio" />
+          <Field type="text" name="Hard_disk_size" placeholder="Tamaño del disco" />
+        </FormField>
+        <Buttons>
+          <Button type="submit" label="Agregar" color="info" />
+          <Button label="Cancelar" color="info" outline onClick={handleModalAction} />
+        </Buttons>
+      </Form>
+
+  </Formik>
+</CardBoxModal>
+
       <Head>
         <title>{getPageTitle('Departamento')}</title>
       </Head>
       <SectionMain>
         <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Departamento" main>
-          <Button
-            href="https://github.com/justboil/admin-one-react-tailwind"
-            target="_blank"
-            icon={mdiGithub}
-            label="Star on GitHub"
-            color="contrast"
-            roundedFull
-            small
-          />
         </SectionTitleLineWithButton>
 
-        <NotificationBar color="danger">
-          <b>Empty card.</b> When there&apos;s nothing to show
-        </NotificationBar>
-     
-<Dialog header="Header"  style={{ width: '50vw' }}onHide={() => {if (!visible) return; }}>
-    <p className="m-0">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </p>
-</Dialog>
+       
+
+  
+  <Button
+                    color="info"
+                    label="Agregar"
+                    icon={mdiEye}
+                    onClick={() => setIsModalInfoActive(true)}
+                    small
+                  />
       </SectionMain>
     </>
   )
