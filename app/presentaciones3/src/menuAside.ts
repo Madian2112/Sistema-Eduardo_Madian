@@ -1,16 +1,16 @@
 import {
-/*  mdiAccountCircle,*/
-  mdiMonitor,/*
+  mdiAccountCircle,
+  mdiMonitor,
   mdiGithub,
   mdiLock,
   mdiAlertCircle,
-  mdiSquareEditOutline, */
+  mdiSquareEditOutline,
   mdiTable,
   mdiViewList,
-/*  mdiTelevisionGuide,
+  mdiTelevisionGuide,
   mdiResponsive,
   mdiPalette,
-  mdiVuejs,*/
+  mdiVuejs,
 } from '@mdi/js'
 import { MenuAsideItem } from './interfaces'
 

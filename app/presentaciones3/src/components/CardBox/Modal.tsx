@@ -37,7 +37,7 @@ const CardBoxModal = ({
       <CardBox
         className={`transition-transform shadow-lg max-h-modal w-11/12 md:w-3/5 lg:w-2/5 xl:w-4/12 z-50`}
         isModal
-  
+     
       >
         <CardBoxComponentTitle title={title}>
           {!!onCancel && (
