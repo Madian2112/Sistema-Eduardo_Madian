@@ -1,26 +1,25 @@
 import {
-  mdiAccountMultiple,
+  /*mdiAccountMultiple,
   mdiCartOutline,
-  mdiChartPie,
+  mdiChartPie, */
   mdiChartTimelineVariant,
-  mdiGithub,
+  /*mdiGithub,
   mdiMonitorCellphone,
-  mdiReload,
+  mdiReload, */
 } from '@mdi/js'
-
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js'
+import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
+/*import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js' */
 import Head from 'next/head'
-import { InputText } from 'primereact/inputtext';
-import { InputNumber } from 'primereact/inputnumber';
+/*import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber'; */
 import React, { useState, useRef } from 'react'
-import { Dialog } from 'primereact/dialog'
+/*import { Dialog } from 'primereact/dialog' */
 import type { ReactElement } from 'react'
 import Button from '../components/Button'
 import LayoutAuthenticated from '../layouts/Authenticated'
 import SectionMain from '../components/Section/Main'
 import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
-import CardBoxWidget from '../components/CardBox/Widget'
+/*import CardBoxWidget from '../components/CardBox/Widget'
 import { useSampleClients, useSampleTransactions } from '../hooks/sampleData'
 import CardBoxTransaction from '../components/CardBox/Transaction'
 import { Client, Transaction } from '../interfaces'
@@ -30,19 +29,18 @@ import CardBox from '../components/CardBox'
 import { sampleChartData } from '../components/ChartLineSample/config'
 import ChartLineSample from '../components/ChartLineSample'
 import NotificationBar from '../components/NotificationBar'
-import TableSampleClients from '../components/Table/SampleClients'
+import TableSampleClients from '../components/Table/SampleClients' */
 import { getPageTitle } from '../config'
 import { Toast } from 'primereact/toast';
-import { mdiEye, mdiTrashCan } from '@mdi/js'
+import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
 import CardBoxModal from '../components/CardBox/Modal'
-import FormField from '../components/Form/Field'
+/*import FormField from '../components/Form/Field'
 import Divider from '../components/Divider'
-import Buttons from '../components/Buttons'
+import Buttons from '../components/Buttons' */
 import * as Yup from 'yup';
-
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
+
 const DepartamentoPage = () => {
-  const [visible, setVisible] = useState(false)
   const [isModalInfoActive, setIsModalInfoActive] = useState(false);
   const toast = useRef<Toast>(null);
   const handleModalAction = () => {
@@ -171,9 +169,6 @@ const DepartamentoPage = () => {
     {touched.Hard_disk_size && errors.Hard_disk_size && <div className="text-red-500 text-xs mt-1">{errors.Hard_disk_size}</div>}
   </div>
 </div>
-
-
-  
       
       <div className="flex justify-end">
         <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">Add</button>
