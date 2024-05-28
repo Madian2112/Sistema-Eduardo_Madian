@@ -50,13 +50,13 @@ const TelefonoPage = () => {
   }
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Name is requerid').matches(/^[A-Za-z\s]+$/, 'Name should contain only letters and spaces'),
-    year: Yup.number().required('Year is requerid').typeError('Year should be a number').test('is-valid-year', 'Year should be a valid year', (value) => {
+    name: Yup.string().required('Name is requerid').matches(/^[A-Za-z\s]+$/, 'Name should contain only letters and spaces.'),
+    year: Yup.number().required('Year is requerid').typeError('Year should be a number').test('is-valid-year', 'Year should be a valid year.', (value) => {
       return /^[0-9]$/.test(String(value));
     }),
     price: Yup.number().required('Price is requerid').typeError('Price should be a number'),
-    CPU_model: Yup.string().required('Model is requerid').matches(/^[A-Za-z0-9\s]+$/, 'CPU Model should contain only letters, numbers, and spaces'),
-    Hard_disk_size: Yup.string().required('Hard disk size is requerid').matches(/^[A-Za-z0-9\s.]+$/, 'Hard disk size should contain only letters, numbers, spaces and dots'),
+    CPU_model: Yup.string().required('Model is requerid').matches(/^[A-Za-z0-9\s]+$/, 'CPU Model should contain only letters, numbers, and spaces.'),
+    Hard_disk_size: Yup.string().required('Hard disk size is requerid').matches(/^[A-Za-z0-9\s.]+$/, 'Hard disk size should contain only letters, numbers, spaces and dots.'),
   });
 
   const Send = async (values) => {
