@@ -7,6 +7,7 @@ import {
   mdiMonitorCellphone,
   mdiReload,
 } from '@mdi/js'
+
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js'
 import Head from 'next/head'
@@ -47,7 +48,6 @@ const DepartamentoPage = () => {
   const handleModalAction = () => {
     setIsModalInfoActive(false);
   }
-
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is requerid'),
@@ -105,7 +105,6 @@ const DepartamentoPage = () => {
 >
   <Formik
     initialValues={{
-
       name: '',
       year: '',
       CPU_model: '',
