@@ -8,7 +8,6 @@ import {
   mdiReload,
 } from '@mdi/js'
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-
 import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js'
 import Head from 'next/head'
 import { InputText } from 'primereact/inputtext';
@@ -17,7 +16,6 @@ import React, { useState, useRef } from 'react'
 import { Dialog } from 'primereact/dialog'
 import type { ReactElement } from 'react'
 import Button from '../components/Button'
-
 import LayoutAuthenticated from '../layouts/Authenticated'
 import SectionMain from '../components/Section/Main'
 import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
@@ -40,6 +38,7 @@ import FormField from '../components/Form/Field'
 import Divider from '../components/Divider'
 import Buttons from '../components/Buttons'
 import * as Yup from 'yup';
+
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 const DepartamentoPage = () => {
   const [visible, setVisible] = useState(false)
@@ -48,6 +47,7 @@ const DepartamentoPage = () => {
   const handleModalAction = () => {
     setIsModalInfoActive(false);
   }
+
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is requerid'),
@@ -81,6 +81,7 @@ const DepartamentoPage = () => {
       const responseData = await response.json();
       console.log('Success:', responseData);
       setIsModalInfoActive(false);
+
       toast.current?.show({ severity: 'success', summary: 'Success', detail: `Product added successfully. Status Code: ${response.status}`, life: 3000 });
     } else {
       console.error('Error:', response.statusText);
@@ -104,6 +105,7 @@ const DepartamentoPage = () => {
 >
   <Formik
     initialValues={{
+
       name: '',
       year: '',
       CPU_model: '',
@@ -196,6 +198,7 @@ const DepartamentoPage = () => {
   <Button
                     color="info"
                     label="Add"
+
                     icon={mdiEye}
                     onClick={() => setIsModalInfoActive(true)}
                     small
