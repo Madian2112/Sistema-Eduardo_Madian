@@ -186,7 +186,7 @@ const TelefonoPage = () => {
         <title>{getPageTitle('Telefono')}</title>
       </Head>
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Telefono" main>
+        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Axio" main>
         </SectionTitleLineWithButton>
 
        
