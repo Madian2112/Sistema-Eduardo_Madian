@@ -29,6 +29,16 @@ const menuAside: MenuAsideItem[] = [
         icon: mdiMonitor,
         label: 'Departamento',
       },
+      {
+        href: '/ecoTasa',
+        icon: mdiMonitor,
+        label: 'Eco Tasa',
+      },
+      {
+        href: '/formasEnvio',
+        icon: mdiMonitor,
+        label: 'Formas de envio',
+      },
     ],
   },
 
