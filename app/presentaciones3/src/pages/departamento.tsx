@@ -1,32 +1,52 @@
 import {
-
+  /*mdiAccountMultiple,
+  mdiCartOutline,
+  mdiChartPie, */
   mdiChartTimelineVariant,
+  /*mdiGithub,
+  mdiMonitorCellphone,
+  mdiReload, */
 } from '@mdi/js'
-import { Formik, Form, Field} from 'formik';
+
+import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
+/*import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js' */
 import Head from 'next/head'
+/*import { InputText } from 'primereact/inputtext';
+import { InputNumber } from 'primereact/inputnumber'; */
 import React, { useState, useRef } from 'react'
+/*import { Dialog } from 'primereact/dialog' */
 import type { ReactElement } from 'react'
 import Button from '../components/Button'
 import LayoutAuthenticated from '../layouts/Authenticated'
 import SectionMain from '../components/Section/Main'
 import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
+/*import CardBoxWidget from '../components/CardBox/Widget'
+import { useSampleClients, useSampleTransactions } from '../hooks/sampleData'
+import CardBoxTransaction from '../components/CardBox/Transaction'
+import { Client, Transaction } from '../interfaces'
+import CardBoxClient from '../components/CardBox/Client'
+import SectionBannerStarOnGitHub from '../components/Section/Banner/StarOnGitHub'
+import CardBox from '../components/CardBox'
+import { sampleChartData } from '../components/ChartLineSample/config'
+import ChartLineSample from '../components/ChartLineSample'
+import NotificationBar from '../components/NotificationBar'
+import TableSampleClients from '../components/Table/SampleClients' */
 import { getPageTitle } from '../config'
 import { Toast } from 'primereact/toast';
-import { mdiEye} from '@mdi/js'
+import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
 import CardBoxModal from '../components/CardBox/Modal'
+/*import FormField from '../components/Form/Field'
+import Divider from '../components/Divider'
+import Buttons from '../components/Buttons' */
 import * as Yup from 'yup';
-
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
-const DepartamentoPage = () => {
 
+const DepartamentoPage = () => {
   const [isModalInfoActive, setIsModalInfoActive] = useState(false);
-  
   const toast = useRef<Toast>(null);
-  
   const handleModalAction = () => {
     setIsModalInfoActive(false);
   }
-
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is requerid'),
@@ -46,6 +66,8 @@ const DepartamentoPage = () => {
         "Hard disk size": values.Hard_disk_size,
       },
     };
+
+
     const response = await fetch('https://api.restful-api.dev/objects', {
       method: 'POST',
       headers: {
@@ -56,11 +78,17 @@ const DepartamentoPage = () => {
 
     if (response.ok) {
       const responseData = await response.json();
+      console.log('Success:', responseData);
       setIsModalInfoActive(false);
+
       toast.current?.show({ severity: 'success', summary: 'Success', detail: `Product added successfully. Status Code: ${response.status}`, life: 3000 });
     } else {
+      console.error('Error:', response.statusText);
+      alert('Failed to add product');
       toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product. Status Code: ${response.status}`, life: 3000 });
     }
+
+    setIsModalInfoActive(false);
   }
   return (
     <>
@@ -83,10 +111,11 @@ const DepartamentoPage = () => {
       Hard_disk_size: '',
     }}
   validationSchema={validationSchema}
-  onSubmit={(values) => {
+  onSubmit={(values, { setSubmitting }) => {
     if (values.name && values.year && values.price && values.CPU_model && values.Hard_disk_size) {
       Send(values);
     }
+    setSubmitting(false);
   }}
   >
   {({ errors, touched })=> (
@@ -141,9 +170,6 @@ const DepartamentoPage = () => {
     {touched.Hard_disk_size && errors.Hard_disk_size && <div className="text-red-500 text-xs mt-1">{errors.Hard_disk_size}</div>}
   </div>
 </div>
-
-
-  
       
       <div className="flex justify-end">
         <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">Add</button>
