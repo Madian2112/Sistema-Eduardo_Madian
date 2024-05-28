@@ -21,13 +21,13 @@ const menuAside: MenuAsideItem[] = [
     menu: [
       {
         href: '/telefonos',
-        label: 'Telefono',
+        label: 'Axio',
         icon: mdiTable,
       },
       {
         href: '/departamento',
         icon: mdiMonitor,
-        label: 'Departamento',
+        label: 'Fetch',
       },
     ],
   },
