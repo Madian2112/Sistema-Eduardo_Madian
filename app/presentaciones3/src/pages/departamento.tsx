@@ -7,7 +7,6 @@ import {
   mdiMonitorCellphone,
   mdiReload, */
 } from '@mdi/js'
-
 import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
 /*import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js' */
 import Head from 'next/head'
