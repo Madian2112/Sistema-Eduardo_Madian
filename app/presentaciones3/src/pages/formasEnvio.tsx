@@ -266,7 +266,41 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
           </div>
         )} />
       </DataTable>
+      <div className="p-4">
+          <table className="w-full mb-6 text-center">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-center">Code</th>
+                <th className=" px-4 py-2 text-center">Description</th>
+                <th className=" px-4 py-2 text-center">Creation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className=" px-4 py-2 text-center">12</td>
+                <td className=" px-4 py-2 text-center" >Con</td>
+                <td className=" px-4 py-2 text-center">{new Date().toLocaleDateString()}</td>
+              </tr>
+            </tbody>
+          </table>
 
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2">Action</th>
+                <th className="border px-4 py-2">User</th>
+                <th className="border px-4 py-2">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border px-4 py-2">Edit</td>
+                <td className="border px-4 py-2">Admin</td>
+                <td className="border px-4 py-2">{new Date().toLocaleDateString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
     <CardBoxModal
     title="Delete"
