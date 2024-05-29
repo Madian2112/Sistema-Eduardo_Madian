@@ -16,7 +16,7 @@ import {
   import { mdiEye} from '@mdi/js'
   import CardBoxModal from '../components/CardBox/Modal'
   import * as Yup from 'yup';
-  import { ProductViewModel } from '../interfaces/telefonoViewModel'
+/* import { ProductViewModel } from '../interfaces/telefonoViewModel' */
   import { DataTable } from 'primereact/datatable';
   import { Column } from 'primereact/column';
 import { getFormasEnvio, sendDeleteFormasEnvio, sendEditFormasEnvio, sendFormasEnvio } from './apiService/data/components/ApiService';
@@ -52,15 +52,18 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
     //Envio
     const Send = async () => {
       const productData: FormasEnvioViewModel = {
-        foen_Id:parseFloat(id),
+        foen_Id: parseFloat(id),
         foen_Codigo: codigo,
         foen_Descripcion: descripcion,
         usua_UsuarioCreacion: 1, // Valor predeterminado
         foen_FechaCreacion: new Date().toISOString(),
         usua_UsuarioModificacion: 1,
         foen_FechaModificacion: new Date().toISOString(),
-        usua_UsuarioEliminacion: 1,
+        usuarioEliminacionNombre: "",
         foen_FechaEliminacion: new Date().toISOString(),
+        foen_Estado: "0",
+        usuarioCreacionNombre: "", 
+        usuarioModificacionNombre: ""
       };
       console.log(productData)
       if (elect == "Create") {
@@ -146,8 +149,11 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
         foen_FechaCreacion: new Date().toISOString(),
         usua_UsuarioModificacion: 1,
         foen_FechaModificacion: new Date().toISOString(),
-        usua_UsuarioEliminacion: 1,
+        usuarioEliminacionNombre: "",
         foen_FechaEliminacion: new Date().toISOString(),
+        foen_Estado: "0",
+        usuarioCreacionNombre: "", 
+        usuarioModificacionNombre: ""
       };
       console.log(productData)
 
