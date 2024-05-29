@@ -76,3 +76,21 @@ export const sendEditFormasEnvio = async (productData) => {
   }
 };
 
+export const sendDeleteFormasEnvio = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/FormasEnvio/Eliminar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};

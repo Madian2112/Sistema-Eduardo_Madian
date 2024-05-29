@@ -19,13 +19,14 @@ import {
   import { ProductViewModel } from '../interfaces/telefonoViewModel'
   import { DataTable } from 'primereact/datatable';
   import { Column } from 'primereact/column';
-import { getFormasEnvio, sendEditFormasEnvio, sendFormasEnvio } from './apiService/data/components/ApiService';
+import { getFormasEnvio, sendDeleteFormasEnvio, sendEditFormasEnvio, sendFormasEnvio } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
       
   const FormasPage = () => {
     //IziToast y Modales
     const [elect, EditOrCreate] = useState('');
     const [isModalInfoActive, setIsModalInfoActive] = useState(false);
+    const [isModalDelete, setisModalDeleteActive] = useState(false);
     const toast = useRef<Toast>(null);
     const handleModalAction = () => {
      
@@ -57,7 +58,9 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
         usua_UsuarioCreacion: 1, // Valor predeterminado
         foen_FechaCreacion: new Date().toISOString(),
         usua_UsuarioModificacion: 1,
-        foen_FechaModificacion: new Date().toISOString()
+        foen_FechaModificacion: new Date().toISOString(),
+        usua_UsuarioEliminacion: 1,
+        foen_FechaEliminacion: new Date().toISOString(),
       };
       console.log(productData)
       if (elect == "Create") {
@@ -128,6 +131,44 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
       setIsModalInfoActive(true);
     };
 
+    const handleDelete = (formaEnvio) => {
+      setId(formaEnvio.foen_Id)
+      setCodigo(formaEnvio.foen_Codigo);
+      setDescripcion(formaEnvio.foen_Descripcion);
+      setisModalDeleteActive(true);
+    };
+    const Delete = async () => {
+      const productData: FormasEnvioViewModel = {
+        foen_Id:parseFloat(id),
+        foen_Codigo: codigo,
+        foen_Descripcion: descripcion,
+        usua_UsuarioCreacion: 1, // Valor predeterminado
+        foen_FechaCreacion: new Date().toISOString(),
+        usua_UsuarioModificacion: 1,
+        foen_FechaModificacion: new Date().toISOString(),
+        usua_UsuarioEliminacion: 1,
+        foen_FechaEliminacion: new Date().toISOString(),
+      };
+      console.log(productData)
+
+        try {
+          const response = await sendDeleteFormasEnvio(productData);
+          if (response.status === 200) {
+            console.log('Success:', response.data);
+            setisModalDeleteActive(false);
+            fetchFormasEnvio(); 
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          } else {
+            console.error('Error:', response.statusText);
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+        }
+
+ 
+    };
 
     return (
       <>
@@ -221,10 +262,29 @@ import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
           <div className='flex gap-3.5 justify-center'>
             <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
             <Button color="info" label="Detalles" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-            <Button color="info" label="Eliminar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
+            <Button color="info" label="Eliminar" icon={mdiEye} onClick={() => handleDelete(rowData)} small />
           </div>
         )} />
       </DataTable>
+
+
+    <CardBoxModal
+    title="Delete"
+    buttonColor="info"
+    buttonLabel="Add"
+    isActive={isModalDelete}
+    onConfirm={handleModalAction}
+    onCancel={handleModalAction}
+  >
+
+<div className="text-center mb-4">
+          <p>Are you sure you want to delete?</p>
+        </div>
+        <div className="flex justify-center gap-4">
+          <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
+          <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onClick={() => setisModalDeleteActive(false)}>No</button>
+        </div>
+  </CardBoxModal>
         </SectionMain>
       </>
     )
