@@ -1,8 +1,8 @@
 import {
   /*mdiAccountMultiple,
   mdiCartOutline,
-  mdiChartPie, */
-  mdiChartTimelineVariant,
+  mdiChartPie, 
+  mdiChartTimelineVariant, */
   mdiCity,
   mdiPlus,
   /*mdiGithub,
@@ -34,7 +34,7 @@ import NotificationBar from '../components/NotificationBar'
 import TableSampleClients from '../components/Table/SampleClients' */
 import { getPageTitle } from '../config'
 import { Toast } from 'primereact/toast';
-import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
+import {/* mdiEye, mdiTrashCan*/ } from '@mdi/js' 
 import CardBoxModal from '../components/CardBox/Modal'
 /*import FormField from '../components/Form/Field'
 import Divider from '../components/Divider'
@@ -45,7 +45,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Card } from 'primereact/card';
 /* CODIGO PARA EL DATATABLE*/
-import { classNames } from 'primereact/utils';
+/*import { classNames } from 'primereact/utils';
 import { FilterMatchMode, FilterService } from 'primereact/api';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
@@ -54,7 +54,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
 import { Tag } from 'primereact/tag';
-import { TriStateCheckbox } from 'primereact/tristatecheckbox';
+import { TriStateCheckbox } from 'primereact/tristatecheckbox'; */
 import { CustomerService } from '../service/CustomerService';
 
 /* INICIO DEL CODIGO */
