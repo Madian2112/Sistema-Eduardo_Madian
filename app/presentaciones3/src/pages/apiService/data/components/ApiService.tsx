@@ -1,5 +1,6 @@
 import axios from 'axios';
-
+import {Ciudad} from '../../../../interfaces/CiudadViewModel';
+import {Aldea} from '../../../../interfaces/AldeaViewModel';
 
 const API_URL = "https://localhost:44380/";
 
@@ -185,4 +186,95 @@ export const sendDeleteAldea = async (productData) => {
     throw error;
   }
 };
+//#endregion
+
+//#region  MASTER DE CIUDADES
+export const getAldeas = async () => {
+  
+  try {
+    const apiKey = import.meta.env.VITE_ApiKey
+
+    if (!apiKey) {
+      console.error('API key is undefined.')
+      return
+    }
+
+    const response = await axios.get(
+      API_URL + 'api/Aldea/Listar',
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+
+    const data = await response.data
+    return data.data.map((aldea: Aldea) => {
+      return {
+        alde_Id: aldea.alde_Id,
+        alde_Nombre: aldea.alde_Nombre,
+        ciud_Id: aldea.ciud_Id,
+        ciud_Nombre: aldea.ciud_Nombre,
+        pvin_Id: aldea.pvin_Id,
+        pvin_Nombre: aldea.pvin_Nombre,
+        // status: 'in progress',
+        // label: 'documentation',
+        // priority: 'medium',
+      }
+    })
+  } catch (error) {
+    return []
+  }
+}
+
+export const cargarCiudades = async () => {
+  try {
+    const apiKey = import.meta.env.VITE_ApiKey
+
+    if (!apiKey) {
+      console.error('API key is undefined.')
+      return
+    }
+
+    const response = await fetch(
+      API_URL + 'api/Ciudades/Listar?ciud_EsAduana=true',
+      {
+        method: 'GET',
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    return getAldeas()
+      .then((aldea: Aldea[]) => {
+        return data.data.map((ciudad: Ciudad) => {
+          return {
+            id: ciudad.ciud_Id,
+            ciudad: ciudad.ciud_Nombre,
+            subRows: aldea.filter((ald) => ald.ciud_Id === ciudad.ciud_Id),
+            // status: 'in progress',
+            // label: 'documentation',
+            // priority: 'medium',
+          }
+        })
+      })
+      .catch((err) => {
+        console.error('Error al cargar las ciudades:', err)
+        return [] // Return an empty array in case of error
+      })
+  } catch (error) {
+    console.error('Error in cargarCiudades:', error)
+    return []
+  }
+}
 //#endregion
