@@ -1,92 +1,134 @@
 import {
-    /*mdiAccountMultiple,
-    mdiCartOutline,
-    mdiChartPie, */
     mdiChartTimelineVariant,
-    /*mdiGithub,
-    mdiMonitorCellphone,
-    mdiReload, */
   } from '@mdi/js'
-  import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
-  /*import { mdiAccount, mdiBallotOutline, mdiMail, mdiUpload } from '@mdi/js' */
+  import { Formik, Form, Field, } from 'formik';
+
   import Head from 'next/head'
-  /*import { InputText } from 'primereact/inputtext';
-  import { InputNumber } from 'primereact/inputnumber'; */
-  import React, { useState, useRef } from 'react'
-  /*import { Dialog } from 'primereact/dialog' */
+  import React, { useState, useRef, useEffect } from 'react'
+
   import type { ReactElement } from 'react'
   import Button from '../components/Button'
   import LayoutAuthenticated from '../layouts/Authenticated'
   import SectionMain from '../components/Section/Main'
   import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
-  /*import CardBoxWidget from '../components/CardBox/Widget'
-  import { useSampleClients, useSampleTransactions } from '../hooks/sampleData'
-  import CardBoxTransaction from '../components/CardBox/Transaction'
-  import { Client, Transaction } from '../interfaces'
-  import CardBoxClient from '../components/CardBox/Client'
-  import SectionBannerStarOnGitHub from '../components/Section/Banner/StarOnGitHub'
-  import CardBox from '../components/CardBox'
-  import { sampleChartData } from '../components/ChartLineSample/config'
-  import ChartLineSample from '../components/ChartLineSample'
-  import NotificationBar from '../components/NotificationBar'
-  import TableSampleClients from '../components/Table/SampleClients' */
   import { getPageTitle } from '../config'
   import { Toast } from 'primereact/toast';
-  import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
+  import { mdiEye} from '@mdi/js'
   import CardBoxModal from '../components/CardBox/Modal'
-  /*import FormField from '../components/Form/Field'
-  import Divider from '../components/Divider'
-  import Buttons from '../components/Buttons' */
   import * as Yup from 'yup';
   import { ProductViewModel } from '../interfaces/telefonoViewModel'
-  
+  import { DataTable } from 'primereact/datatable';
+  import { Column } from 'primereact/column';
+import { getFormasEnvio, sendEditFormasEnvio, sendFormasEnvio } from './apiService/data/components/ApiService';
+import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
+      
   const FormasPage = () => {
     //IziToast y Modales
+    const [elect, EditOrCreate] = useState('');
     const [isModalInfoActive, setIsModalInfoActive] = useState(false);
     const toast = useRef<Toast>(null);
     const handleModalAction = () => {
-      setIsModalInfoActive(false);
-    }
-    //Validador
-    const validationSchema = Yup.object().shape({
-      name: Yup.string().required('Name is requerid').matches(/^[A-Za-z\s]+$/, 'Name should contain only letters and spaces.'),
-      year: Yup.number().required('Year is requerid').typeError('Year should be a number').test('len', 'Must be exactly 4 characters', val => val.toString().length  == 4),
-      price: Yup.number().required('Price is requerid').typeError('Price should be a number'),
-      CPU_model: Yup.string().required('Model is requerid').matches(/^[A-Za-z0-9\s]+$/, 'CPU Model should contain only letters, numbers, and spaces.'),
-      Hard_disk_size: Yup.string().required('Hard disk size is requerid').matches(/^[A-Za-z0-9\s.]+$/, 'Hard disk size should contain only letters, numbers, spaces and dots.'),
-    });
-    //Envio
-    const Send = async (values) => {
-      const productData : ProductViewModel ={
-        name: values.name,
-        data: {
-          year: parseInt(values.year),
-          price: parseFloat(values.price),
-          "CPU model": values.CPU_model,
-          "Hard disk size": values.Hard_disk_size,
-        },
-      };
-      const response = await fetch('https://api.restful-api.dev/objects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log('Success:', responseData);
-        setIsModalInfoActive(false);
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Product added successfully. Status Code: ${response.status}`, life: 3000 });
-      } else {
-        console.error('Error:', response.statusText);
-        alert('Failed to add product');
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product. Status Code: ${response.status}`, life: 3000 });
-      }
+     
       setIsModalInfoActive(false);
     }
 
+    const handleModalCreate = () => {
+      EditOrCreate("Create")
+      setId("1")
+      setCodigo("");
+      setDescripcion("");
+      setIsModalInfoActive(true);
+    }
+    //Validador
+    const validationSchema = Yup.object().shape({
+      foen_Codigo: Yup.string().required('Codigo is requerid').matches(/^[A-Za-z\s]+$/, 'Name should contain only letters and spaces.').test('len', 'Must be exactly 2 characters', val => val.length  == 2),
+      foen_Descripcion: Yup.string().required('Descripcion is requerid')
+    });
+    //Inicializar Variables
+    const [codigo, setCodigo] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [id, setId] = useState('');
+    //Envio
+    const Send = async () => {
+      const productData: FormasEnvioViewModel = {
+        foen_Id:parseFloat(id),
+        foen_Codigo: codigo,
+        foen_Descripcion: descripcion,
+        usua_UsuarioCreacion: 1, // Valor predeterminado
+        foen_FechaCreacion: new Date().toISOString(),
+        usua_UsuarioModificacion: 1,
+        foen_FechaModificacion: new Date().toISOString()
+      };
+      console.log(productData)
+      if (elect == "Create") {
+        try {
+          const response = await sendFormasEnvio(productData);
+          if (response.status === 200) {
+            console.log('Success:', response.data);
+            setIsModalInfoActive(false);
+            fetchFormasEnvio(); 
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          } else {
+            console.error('Error:', response.statusText);
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+        }
+      }else if(elect == "Edit") {
+        try {
+          const response = await sendEditFormasEnvio(productData);
+          if (response.status === 200) {
+            console.log('Success:', response.data);
+            setIsModalInfoActive(false);
+            fetchFormasEnvio(); 
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          } else {
+            console.error('Error:', response.statusText);
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+        }
+      }
+     
+    }
+
+    //Hooks Almacenar Datos
+    const [formasEnvio, setFormasEnvio] = useState([]);
+    const [loading, setLoading] = useState(false);
+    
+
+    const fetchFormasEnvio = async () => {
+      setLoading(true);
+      try {
+        const data = await getFormasEnvio();
+        setFormasEnvio(data);
+        setLoading(false);
+      } catch (error) {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch formas envio', life: 3000 });
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      fetchFormasEnvio();
+    }, []);
     //HTML
+
+
+    const handleEdit = (formaEnvio) => {
+      EditOrCreate("Edit")
+      console.log(formaEnvio)
+      setId(formaEnvio.foen_Id)
+      setCodigo(formaEnvio.foen_Codigo);
+      setDescripcion(formaEnvio.foen_Descripcion);
+      setIsModalInfoActive(true);
+    };
+
+
     return (
       <>
   <Toast ref={toast}/>
@@ -100,72 +142,48 @@ import {
   >
     <Formik
       initialValues={{
-        name: '',
-        year: '',
-        CPU_model: '',
-        price: '',
-        Hard_disk_size: '',
+        foen_Codigo: codigo,
+        foen_Descripcion: descripcion,
       }}
     validationSchema={validationSchema}
+    enableReinitialize
     onSubmit={(values, { setSubmitting }) => {
-      if (values.name && values.year && values.price && values.CPU_model && values.Hard_disk_size) {
-        Send(values);
-      }
+      Send();
       setSubmitting(false);
     }}
     >
-    {({ errors, touched })=> (
+    {({ errors, touched, setFieldValue  })=> (
         <Form className='w-full'>
     <div className="flex justify-between mb-6">
     <div className="flex flex-col mr-4 flex-1"> 
-      <label htmlFor="name" className="mb-2">Name</label>
+      <label htmlFor="name" className="mb-2">Code</label>
       <Field 
-        name="name" 
-        className={`border p-2 ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'}`}
+        name="foen_Codigo"
+        onChange={(e) => {
+          setFieldValue('foen_Codigo', e.target.value);
+          setCodigo(e.target.value);
+        }}
+        className={`border p-2 ${touched.foen_Codigo && errors.foen_Codigo ? 'border-red-500' : 'border-gray-300'}`}
       />
-      {touched.name && errors.name && <div className="text-red-500 text-xs mt-1">{errors.name}</div>}
+      {touched.foen_Codigo && errors.foen_Codigo && <div className="text-red-500 text-xs mt-1">{errors.foen_Codigo}</div>}
     </div>
     <div className="flex flex-col flex-1">
-      <label htmlFor="year" className="mb-2">Year</label>
+      <label htmlFor="year" className="mb-2">Description</label>
       <Field 
-        type="number" 
-        name="year" 
-        className={`border p-2 ${touched.year && errors.year ? 'border-red-500' : 'border-gray-300'}`}
+        name="foen_Descripcion" 
+        onChange={(e) => {
+          setFieldValue('foen_Descripcion', e.target.value);
+          setDescripcion(e.target.value);
+        }}
+        className={`border p-2 ${touched.foen_Descripcion && errors.foen_Descripcion ? 'border-red-500' : 'border-gray-300'}`}
       />
-      {touched.year && errors.year && <div className="text-red-500 text-xs mt-1">{errors.year}</div>}
+      {touched.foen_Descripcion && errors.foen_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.foen_Descripcion}</div>}
     </div>
   </div>
   
-  <div className="flex justify-between mb-6">
-    <div className="flex flex-col mr-4 flex-1"> 
-      <label htmlFor="price" className="mb-2">Price</label>
-      <Field 
-        type="number" 
-        name="price" 
-        className={`border p-2 ${touched.price && errors.price ? 'border-red-500' : 'border-gray-300'}`}
-      />
-      {touched.price && errors.price && <div className="text-red-500 text-xs mt-1">{errors.price}</div>}
-    </div>
-    <div className="flex flex-col flex-1">
-      <label htmlFor="CPU_model" className="mb-2">CPU Model</label>
-      <Field 
-        name="CPU_model" 
-        className={`border p-2 ${touched.CPU_model && errors.CPU_model ? 'border-red-500' : 'border-gray-300'}`}
-      />
-      {touched.CPU_model && errors.CPU_model && <div className="text-red-500 text-xs mt-1">{errors.CPU_model}</div>}
-    </div>
-  </div>
+
   
-  <div className="flex justify-between mb-6">
-    <div className="flex flex-col mr-4 flex-1"> 
-      <label htmlFor="Hard_disk_size" className="mb-2">Hard disk size</label>
-      <Field 
-        name="Hard_disk_size" 
-        className={`border p-2 ${touched.Hard_disk_size && errors.Hard_disk_size ? 'border-red-500' : 'border-gray-300'}`}
-      />
-      {touched.Hard_disk_size && errors.Hard_disk_size && <div className="text-red-500 text-xs mt-1">{errors.Hard_disk_size}</div>}
-    </div>
-  </div>
+
         
         <div className="flex justify-end">
           <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">Add</button>
@@ -186,14 +204,27 @@ import {
          
   
     
-    <Button
-                      color="info"
-                      label="Add"
-  
-                      icon={mdiEye}
-                      onClick={() => setIsModalInfoActive(true)}
-                      small
-                    />
+    <Button color="info" label="Add" icon={mdiEye} onClick={() => handleModalCreate() } small/>
+
+      <DataTable 
+        value={formasEnvio} 
+        loading={loading} 
+        responsiveLayout="scroll"
+        paginator 
+        rows={10}
+      >
+        <Column field="foen_Id" header="Id" sortable />
+        <Column field="foen_Codigo" header="Code" sortable />
+        <Column field="foen_Descripcion" header="Description" sortable />
+        <Column 
+         body={rowData => (
+          <div className='flex gap-3.5 justify-center'>
+            <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
+            <Button color="info" label="Detalles" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
+            <Button color="info" label="Eliminar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
+          </div>
+        )} />
+      </DataTable>
         </SectionMain>
       </>
     )

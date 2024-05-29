@@ -34,9 +34,6 @@ import { getPageTitle } from '../config'
 import { Toast } from 'primereact/toast';
 import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
 import CardBoxModal from '../components/CardBox/Modal'
-/*import FormField from '../components/Form/Field'
-import Divider from '../components/Divider'
-import Buttons from '../components/Buttons' */
 import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 
