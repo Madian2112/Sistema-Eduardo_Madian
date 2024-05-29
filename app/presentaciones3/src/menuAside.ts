@@ -35,6 +35,16 @@ const menuAside: MenuAsideItem[] = [
         icon: mdiCity,
         label: 'Aldea',
       },
+      {
+        href: '/ecoTasa',
+        icon: mdiMonitor,
+        label: 'Eco Tasa',
+      },
+      {
+        href: '/formasEnvio',
+        icon: mdiMonitor,
+        label: 'Formas de envio',
+      },
     ],
   },
 
