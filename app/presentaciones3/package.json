@@ -9,11 +9,12 @@
     "format": "prettier 'src/**/*.{tsx,ts,js}' --write"
   },
   "dependencies": {
+    "@infinite-table/infinite-react": "^3.3.3",
     "@mdi/js": "^7.0.96",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.7.2",
     "chart.js": "^4.4.0",
-    "formik": "^2.4.2",
+    "formik": "^2.4.6",
     "next": "^13.4.7",
     "numeral": "^2.0.6",
     "primeicons": "^7.0.0",

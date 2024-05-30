@@ -180,7 +180,7 @@ const DepartamentoPage = () => {
         <title>{getPageTitle('Departamento')}</title>
       </Head>
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Departamento" main>
+        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Fetch" main>
         </SectionTitleLineWithButton>
 
        
