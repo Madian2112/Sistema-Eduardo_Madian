@@ -11,6 +11,7 @@ import {
   mdiResponsive,
   mdiPalette,
   mdiVuejs,
+  mdiCity
 } from '@mdi/js'
 import { MenuAsideItem } from './interfaces'
 
@@ -28,6 +29,26 @@ const menuAside: MenuAsideItem[] = [
         href: '/departamento',
         icon: mdiMonitor,
         label: 'Fetch',
+      },
+      {
+        href: '/aldea',
+        icon: mdiCity,
+        label: 'Aldea',
+      },
+      {
+        href: '/CiudadMasterDetails',
+        icon: mdiCity,
+        label: 'Ciudad',
+      },
+      {
+        href: '/ecoTasa',
+        icon: mdiMonitor,
+        label: 'Eco Tasa',
+      },
+      {
+        href: '/formasEnvio',
+        icon: mdiMonitor,
+        label: 'Formas de envio',
       },
     ],
   },
