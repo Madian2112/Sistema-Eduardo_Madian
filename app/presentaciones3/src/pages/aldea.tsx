@@ -314,9 +314,9 @@ const AldeaPage = () => {
       {touched.alde_Nombre && errors.alde_Nombre && <div className="text-red-500 text-xs mt-1">{errors.alde_Nombre}</div>}
     </div>
 
-    <div className="flex flex-col mr-3 flex-1">
+    <div className="flex flex-col mr-3 flex-1 w-56">
     <label htmlFor="pais" className="mb-2">Selecciona un País</label>
-    <select id="pais" name="pais_Id" value={selectedPais} onChange={ handleChange } className="p-dropdown">
+    <select id="pais" name="pais_Id" value={selectedPais} onChange={ handleChange } className="p-dropdown border-gray-300">
         <option value="0">Seleccione</option>
         {paises.map((pais) => (
           <option key={pais.pais_Id} value={pais.pais_Id} className="p-dropdown-item">{pais.pais_Nombre}</option>
@@ -329,7 +329,7 @@ const AldeaPage = () => {
 
     <div className="flex flex-col mr-3 flex-1">
     <label htmlFor="pais" className="mb-2">Selecciona un Provincia</label>
-    <select id="provincia" value={selectedProvincia} onChange={handleChanges} className="p-dropdown">
+    <select id="provincia" value={selectedProvincia} onChange={handleChanges} className="p-dropdown  border-gray-300">
         <option value="">Seleccione</option>
         {provincias.map((provincia) => (
           <option key={provincia.pvin_Id} value={provincia.pvin_Id} className="p-dropdown-item">{provincia.pvin_Nombre}</option>
@@ -339,7 +339,7 @@ const AldeaPage = () => {
 
     <div className="flex flex-col mr-3 flex-1">
     <label htmlFor="pais" className="mb-2">Selecciona una Ciudad</label>
-    <select id="ciud_Id" name="ciud_Id" value={selectedCiudad} onChange={handleChangess} className="p-dropdown">
+    <select id="ciud_Id" name="ciud_Id" value={selectedCiudad} onChange={handleChangess} className="p-dropdown  border-gray-300">
         <option value="">Seleccione</option>
         {ciudades.map((ciudad) => (
           <option key={ciudad.ciud_Id} value={ciudad.ciud_Id} className="p-dropdown-item">{ciudad.ciud_Nombre}</option>
