@@ -95,8 +95,9 @@ export const sendDeleteFormasEnvio = async (productData) => {
 };
 //#endregion
 
-//#region  ALDEASS
-export const getAldea = async () => {
+
+//#region  ECOTASAAA
+export const getEcoTasa = async () => {
   console.log("Full URL:", API_URL);
   console.log("ENTRO AQUI");
   try {
@@ -108,7 +109,8 @@ export const getAldea = async () => {
     }
     
     const response = await axios.get(
-      API_URL + 'api/Aldea/Listar',
+      API_URL + 'api/Ecotasa/Listar',
+
       {
         headers: {
           XApiKey: apiKey,
@@ -116,7 +118,9 @@ export const getAldea = async () => {
         },
       }
     );
-    console.log("La data es: " + response.data.data);
+
+    console.log("La data es");
+    console.log(response.data.data);
     const data = await response.data.data ;
  
     return data;
@@ -126,36 +130,36 @@ export const getAldea = async () => {
   }
 };
 
-export const sendAldea = async (productData) => {
-  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+export const sendEcoTasaEnvio = async (productData) => {
   try {
-    console.log("La data que me trae es: " + productData.data)
     const response = await axios.post(
-      API_URL + 'api/Aldea/Insertar' + productData,
+      API_URL + 'api/Ecotasa/Insertar',
+      productData,
       {
         headers: {
-          XApiKey: apiKey,
           'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
         },
       }
     );
     return response;
   } catch (error) {
-    console.error("Error sending aldea:", error);
+
+    console.error("Error sending formas envio:", error);
     throw error;
   }
 };
 
 
-export const sendEditAldea = async (productData) => {
-  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+export const sendEcoTasaEdit = async (productData) => {
   try {
     const response = await axios.post(
-      API_URL + 'api/Aldea/Editar'+productData,
+      API_URL + 'api/Ecotasa/Editar',
+      productData,
       {
         headers: {
-          XApiKey: apiKey,
           'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
         },
       }
     );
@@ -166,10 +170,10 @@ export const sendEditAldea = async (productData) => {
   }
 };
 
-export const sendDeleteAldea = async (productData) => {
+export const sendDeleteEcoTasa = async (productData) => {
   try {
     const response = await axios.post(
-      API_URL + 'api/Aldea/Eliminar',
+      API_URL + 'api/Ecotasa/Eliminar',
       productData,
       {
         headers: {
@@ -384,6 +388,81 @@ export const getCiudadesPorProvincias = async (idprovincia) => {
   } catch (error) {
     console.error("Error fetching formas envio:", error);
     return [];
+  }
+};
+//#endregion
+
+          
+//region ALDEASSSS
+ export const getAldea = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/Aldea/Listar',
+
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log("La data es: " + response.data.data);
+
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+          
+export const sendAldea = async (productData) => {
+  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+  try {
+    console.log("La data que me trae es: " + productData.data)
+    const response = await axios.post(
+      API_URL + 'api/Aldea/Insertar' + productData,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending aldea:", error);
+
+    throw error;
+  }
+};
+    
+export const sendEditAldea = async (productData) => {
+  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+  try {
+    const response = await axios.post(
+      API_URL + 'api/Aldea/Editar'+productData,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
   }
 };
 //#endregion
