@@ -9,11 +9,12 @@
     "format": "prettier 'src/**/*.{tsx,ts,js}' --write"
   },
   "dependencies": {
+    "@infinite-table/infinite-react": "^3.3.3",
     "@mdi/js": "^7.0.96",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.7.2",
     "chart.js": "^4.4.0",
-    "formik": "^2.4.2",
+    "formik": "^2.4.6",
     "next": "^13.4.7",
     "numeral": "^2.0.6",
     "primeicons": "^7.0.0",
@@ -32,6 +33,7 @@
     "@types/react-redux": "^7.1.25",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.3",
+    "@vitejs/plugin-react-swc": "^3.6.0",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.43.0",
     "eslint-config-next": "^13.4.7",
@@ -40,6 +42,7 @@
     "postcss-import": "^15.1.0",
     "prettier": "^3.0.3",
     "tailwindcss": "^3.3.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vite": "^5.2.9"
   }
 }

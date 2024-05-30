@@ -34,9 +34,6 @@ import { getPageTitle } from '../config'
 import { Toast } from 'primereact/toast';
 import { mdiEye, /*mdiTrashCan*/ } from '@mdi/js'
 import CardBoxModal from '../components/CardBox/Modal'
-/*import FormField from '../components/Form/Field'
-import Divider from '../components/Divider'
-import Buttons from '../components/Buttons' */
 import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 
@@ -49,9 +46,7 @@ const DepartamentoPage = () => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is requerid').matches(/^[A-Za-z\s]+$/, 'Name should contain only letters and spaces.'),
-    year: Yup.number().required('Year is requerid').typeError('Year should be a number').test('is-valid-year', 'Year should be a valid year', (value) => {
-      return /^[0-9]$/.test(String(value));
-    }),
+    year: Yup.number().required('Year is requerid').typeError('Year should be a number').test('len', 'Must be exactly 4 characters', val => val.toString().length  == 4),
     price: Yup.number().required('Price is requerid').typeError('Price should be a number'),
     CPU_model: Yup.string().required('Model is requerid').matches(/^[A-Za-z0-9\s]+$/, 'CPU Model should contain only letters, numbers, and spaces.'),
     Hard_disk_size: Yup.string().required('Hard disk size is requerid').matches(/^[A-Za-z0-9\s.]+$/, 'Hard disk size should contain only letters, numbers, spaces and dots.'),
@@ -120,7 +115,7 @@ const DepartamentoPage = () => {
   }}
   >
   {({ errors, touched })=> (
-      <Form>
+      <Form className='w-full'>
   <div className="flex justify-between mb-6">
   <div className="flex flex-col mr-4 flex-1"> 
     <label htmlFor="name" className="mb-2">Name</label>
@@ -185,7 +180,7 @@ const DepartamentoPage = () => {
         <title>{getPageTitle('Departamento')}</title>
       </Head>
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Departamento" main>
+        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Fetch" main>
         </SectionTitleLineWithButton>
 
        
