@@ -1,5 +1,10 @@
 import {
+  mdiAppleKeyboardControl,
+  mdiBorderColor,
   mdiChartTimelineVariant,
+  mdiDelete,
+  mdiDetails,
+  mdiPlus,
 } from '@mdi/js'
 import { Formik, Form, Field, } from 'formik';
 
@@ -260,7 +265,7 @@ const FormasPage = () => {
 
       
       <div className="flex justify-end">
-        <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">Add</button>
+        <button type="submit"  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">Add</button>
         <button type="button" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onClick={() => setIsModalInfoActive(false)}>Cancel</button>
       </div>
       </Form>
@@ -279,7 +284,7 @@ const FormasPage = () => {
 
        
 
-  <Button color="info" label="Add" icon={mdiEye} onClick={() => handleModalCreate() } small/>
+  <Button color="info" label="Add" icon={mdiPlus} onClick={() => handleModalCreate() } small/>
 
     <DataTable 
       value={formasEnvio} 
@@ -294,9 +299,9 @@ const FormasPage = () => {
       <Column 
        body={rowData => (
         <div className='flex gap-3.5 justify-center'>
-          <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-          <Button color="info" label="Detalles" icon={mdiEye} onClick={() => togglePanel(rowData)} small />
-          <Button color="info" label="Eliminar" icon={mdiEye} onClick={() => handleDelete(rowData)} small />
+          <Button color="info" label="Editar" icon={mdiBorderColor} onClick={() => handleEdit(rowData)} small />
+          <Button color="success" label="Detalles" icon={mdiDetails} onClick={() => togglePanel(rowData)} small />
+          <Button color="danger" label="Eliminar" icon={mdiDelete} onClick={() => handleDelete(rowData)} small />
         </div>
       )} />
     </DataTable>
@@ -315,7 +320,7 @@ const FormasPage = () => {
       </div>
       <div className="flex justify-center gap-4">
         <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
-        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onClick={() => setisModalDeleteActive(false)}>No</button>
+        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteActive(false)}>No</button>
       </div>
 </CardBoxModal>
       </SectionMain>
@@ -349,7 +354,7 @@ const FormasPage = () => {
         </table>
 
 
-            <h2>Auditoria</h2>
+            <h2 className='font-extrabold ml-1 mt-1 mb-1'>Auditoria</h2>
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -373,7 +378,7 @@ const FormasPage = () => {
         </table>
       </div>
 
-      <Button color="info" label="Cancel" icon={mdiEye} onClick={() => togglePanelDetails() } small/>
+      <Button color="info" label="Cancel" icon={mdiAppleKeyboardControl} onClick={() => togglePanelDetails() } small/>
       </SectionMain>
        )}
     </>

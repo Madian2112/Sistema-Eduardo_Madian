@@ -2,7 +2,10 @@ import {
   mdiPlus,
   mdiEye, 
   mdiCity, 
-  mdiChartTimelineVariant
+  mdiChartTimelineVariant,
+  mdiAppleKeyboardControl,
+  mdiBorderColor,
+  mdiDetails
 } from '@mdi/js'
 import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
 import Head from 'next/head'
@@ -281,6 +284,7 @@ const AldeaPage = () => {
     onConfirm={handleModalAction}
     onCancel={handleModalAction}
   >
+           
     <Formik
       initialValues={{
         alde_Nombre: descripcion,
@@ -357,13 +361,14 @@ const AldeaPage = () => {
         <Head>
           <title>{getPageTitle('Departamento')}</title>
         </Head>
+      {isExpanded && (   
         <SectionMain>
           <SectionTitleLineWithButton icon={mdiCity} title="Aldea" main>
           </SectionTitleLineWithButton>
   
          
   
-    
+
     <Button color="info" label="Add" icon={mdiPlus} onClick={() => handleModalCreate() } small/>
 
       <DataTable 
@@ -379,12 +384,13 @@ const AldeaPage = () => {
         <Column 
          body={rowData => (
           <div className='flex gap-3.5 justify-center'>
-            <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-            <Button color="info" label="Detalles" icon={mdiEye} onClick={() => togglePanel(rowData)} small />
+            <Button color="info" label="Editar" icon={mdiBorderColor} onClick={() => handleEdit(rowData)} small />
+            <Button color="success" label="Detalles" icon={mdiDetails} onClick={() => togglePanel(rowData)} small />
           </div>
         )} />
       </DataTable>
         </SectionMain>
+      )}
         {isExpandedDetails && (
       <SectionMain>
         <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Aldea Details" main>
@@ -409,7 +415,7 @@ const AldeaPage = () => {
         </table>
 
 
-            <h2>Auditoria</h2>
+        <h2 className='font-extrabold ml-1 mt-1 mb-1'>Auditoria</h2>
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -433,7 +439,7 @@ const AldeaPage = () => {
         </table>
       </div>
 
-      <Button color="info" label="Cancel" icon={mdiEye} onClick={() => togglePanelDetails() } small/>
+      <Button color="info" label="Cancel" icon={mdiAppleKeyboardControl} onClick={() => togglePanelDetails() } small/>
       </SectionMain>
        )}
       </>

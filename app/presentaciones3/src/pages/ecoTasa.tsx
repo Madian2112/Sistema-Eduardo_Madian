@@ -1,5 +1,10 @@
 import {
+  mdiAppleKeyboardControl,
+  mdiBorderColor,
   mdiChartTimelineVariant,
+  mdiDelete,
+  mdiDetails,
+  mdiPlus,
 } from '@mdi/js'
 import { Formik, Form, Field,} from 'formik';
 import Head from 'next/head'
@@ -46,7 +51,7 @@ const EcoTasaPage = () => {
      const validationSchema = Yup.object().shape({
       ecot_RangoIncial: Yup.number().required('Start Range is requerid').test('len', 'It should be bigger', val => val < parseFloat(RangoFinal)),
       ecot_RangoFinal: Yup.number().required('End Range is requerid'),
-      ecot_CantidadPagar: Yup.number().required('Cantidad Pagar is requerid')
+      ecot_CantidadPagar: Yup.number().required('Cantidad Pagar is requerid').typeError('Must be a number')
      });
      //Inicializar Variables
      const [RangoInicial, setRangoInicial] = useState('');
@@ -299,7 +304,7 @@ const EcoTasaPage = () => {
    
           
    
-     <Button color="info" label="Add" icon={mdiEye} onClick={() => handleModalCreate() } small/>
+     <Button color="info" label="Add" icon={mdiPlus} onClick={() => handleModalCreate() } small/>
  
        <DataTable 
          value={formasEcoTasa} 
@@ -315,9 +320,9 @@ const EcoTasaPage = () => {
          <Column 
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
-             <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-             <Button color="info" label="Detalles" icon={mdiEye} onClick={() => togglePanel(rowData)} small />
-             <Button color="info" label="Eliminar" icon={mdiEye} onClick={() => handleDelete(rowData)} small />
+             <Button color="info" label="Editar" icon={mdiBorderColor} onClick={() => handleEdit(rowData)} small />
+             <Button color="success" label="Detalles" icon={mdiDetails} onClick={() => togglePanel(rowData)} small />
+             <Button color="danger" label="Eliminar" icon={mdiDelete} onClick={() => handleDelete(rowData)} small />
            </div>
          )} />
        </DataTable>
@@ -370,7 +375,7 @@ const EcoTasaPage = () => {
            </table>
  
  
-               <h2>Auditoria</h2>
+           <h2 className='font-extrabold ml-1 mt-1 mb-1'>Auditoria</h2>
            <table className="w-full border-collapse">
              <thead>
                <tr>
@@ -394,7 +399,7 @@ const EcoTasaPage = () => {
            </table>
          </div>
  
-         <Button color="info" label="Cancel" icon={mdiEye} onClick={() => togglePanelDetails() } small/>
+         <Button color="info" label="Cancel" icon={mdiAppleKeyboardControl} onClick={() => togglePanelDetails() } small/>
          </SectionMain>
           )}
        </>
