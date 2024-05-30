@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {Ciudad} from '../../../../interfaces/CiudadViewModel';
 import {Aldea} from '../../../../interfaces/AldeaViewModel';
 
 const API_URL = "https://localhost:44380/";
@@ -26,7 +25,6 @@ export const getFormasEnvio = async () => {
         },
       }
     );
-    console.log("La data es");
     console.log(response.data.data);
     const data = await response.data.data ;
  
@@ -118,8 +116,7 @@ export const getAldea = async () => {
         },
       }
     );
-    console.log("La data es");
-    console.log(response.data.data);
+    console.log("La data es: " + response.data.data);
     const data = await response.data.data ;
  
     return data;
@@ -229,52 +226,33 @@ export const getAldeas = async () => {
   }
 }
 
-export const cargarCiudades = async () => {
+export const getCiudades = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
   try {
-    const apiKey = import.meta.env.VITE_ApiKey
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
 
     if (!apiKey) {
-      console.error('API key is undefined.')
-      return
+      console.error('API key is undefined.');
+      return [];
     }
-
-    const response = await fetch(
-      API_URL + 'api/Ciudades/Listar?ciud_EsAduana=true',
+    
+    const response = await axios.get(
+      `${API_URL}api/Ciudades/Listar?ciud_EsAduana=true`,
       {
-        method: 'GET',
         headers: {
           XApiKey: apiKey,
           'Content-Type': 'application/json',
         },
       }
-    )
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    return getAldeas()
-      .then((aldea: Aldea[]) => {
-        return data.data.map((ciudad: Ciudad) => {
-          return {
-            id: ciudad.ciud_Id,
-            ciudad: ciudad.ciud_Nombre,
-            subRows: aldea.filter((ald) => ald.ciud_Id === ciudad.ciud_Id),
-            // status: 'in progress',
-            // label: 'documentation',
-            // priority: 'medium',
-          }
-        })
-      })
-      .catch((err) => {
-        console.error('Error al cargar las ciudades:', err)
-        return [] // Return an empty array in case of error
-      })
+    );
+    console.log("La data es");
+    console.log(response.data.data);
+    const data = response.data.data;
+    return data;
   } catch (error) {
-    console.error('Error in cargarCiudades:', error)
-    return []
+    console.error("Error fetching formas envio:", error);
+    return [];
   }
-}
+};
 //#endregion

@@ -1,130 +1,75 @@
 import * as React from "react";
-import LayoutAuthenticated from '../layouts/Authenticated'
-import type { ReactElement } from 'react'
-import {
-  InfiniteTable,
-  DataSource,
-  InfiniteTablePropColumns,
-  DataSourceData,
-} from "@infinite-table/infinite-react";
-import { HTMLProps } from "react";
+import axios from 'axios';
+import { InfiniteTable, DataSource, InfiniteTablePropColumns, DataSourceData } from "@infinite-table/infinite-react";
 import { Card } from "primereact/card";
-import {
-    mdiPlus,
-    mdiEye, 
-    mdiCity
-  } from '@mdi/js'
-  import Head from 'next/head'
-  import { useState, useRef, useEffect } from 'react'
-  import Button from '../components/Button'
-  import SectionMain from '../components/Section/Main'
-  import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
-  import { getPageTitle } from '../config'
-  import { Toast } from 'primereact/toast';
-  import {/* mdiEye, mdiTrashCan*/ } from '@mdi/js' 
-  import CardBoxModal from '../components/CardBox/Modal'
-  import * as Yup from 'yup';
-  import { DataTable } from 'primereact/datatable';
-  import { Column } from 'primereact/column';
-  import { getAldea, sendDeleteAldea, sendEditAldea, sendAldea } from './apiService/data/components/ApiService';
-  import cities from "./cities.json";
-  
-const CiudadPage = () => {
+import { getAldea } from './apiService/data/components/ApiService';
+/*import LayoutAuthenticated from '../layouts/Authenticated';
+import type { ReactElement } from 'react';*/
 
-type Developer = {
-  id: number;
-  firstName: string;
-  lastName: string;
-  age: number;
-  country: string;
-  countryCode: string;
-  city: string;
-  stack: string;
-  currency: string;
-  salary: number;
-  canDesign: "yes" | "no";
-  hobby: string;
-  email: string;
-  streetName: string;
+// Tipos de datos
+type Aldea = {
+  alde_Id: string;
+  alde_Nombre: string;
+  ciud_Id: string;
+  ciud_Nombre: string;
+  pvin_Id: string;
+  pvin_Codigo: string;
+  pvin_Nombre: string;
 };
 
-type Aldea = {
-    id: number;
-    firstName: string;
-    lastName: string;
-    age: number;
-    country: string;
-    countryCode: string;
-    city: string;
-    stack: string;
-    currency: string;
-    salary: number;
-    canDesign: "yes" | "no";
-    hobby: string;
-    email: string;
-    streetName: string;
-  };
+type City = {
+  ciud_Id: number;
+  ciud_Nombre: string;
+  pvin_Nombre: string;
+};
 
-const columns: InfiniteTablePropColumns<Developer> = {
-  id: {
-    field: "id",
+// Configuración de columnas
+const columns: InfiniteTablePropColumns<Aldea> = {
+  alde_Id: {
+    field: "alde_Id",
     header: "ID",
     defaultWidth: 60,
     resizable: false,
     type: "number",
   },
   firstName: {
-    field: "firstName",
-    header: "First Name",
+    field: "alde_Nombre",
+    header: "Aldea",
   },
-  lastName: {
-    field: "lastName",
-    header: "Last Name",
-  },
-  country: {
-    field: "country",
+  ciud_Nombre: {
+    field: "ciud_Nombre",
     defaultHiddenWhenGroupedBy: true,
   },
-  city: {
-    field: "city",
-  },
-  age: {
-    field: "age",
+};
+
+const cityColumns: InfiniteTablePropColumns<City> = {
+  id: {
+    field: "ciud_Id",
     type: "number",
-    header: "Age",
+    header: "ID",
     defaultWidth: 80,
+    renderRowDetailIcon: true,
   },
-  salary: {
-    field: "salary",
+  city: {
+    field: "ciud_Nombre",
+    header: "City",
   },
-  currency: {
-    field: "currency",
-  },
-  stack: {
-    field: "stack",
-  },
-  hobby: {
-    field: "hobby",
-  },
-  email: {
-    field: "email",
+  country: {
+    field: "pvin_Nombre",
+    header: "Country",
   },
 };
-const url =
-  "https://infinite-table.com/.netlify/functions/json-server/developers1k-sql";
 
-const fetchDevelopers: DataSourceData<Developer> = ({
-  filterValue,
-  masterRowInfo,
-}) => {
+// Función para obtener datos
+const fetchDevelopers: DataSourceData<Aldea> = async ({ filterValue, masterRowInfo }) => {
   if (masterRowInfo) {
     filterValue = [
       {
-        field: "city",
+        field: "ciud_Id",
         filter: {
           operator: "eq",
           type: "string",
-          value: (masterRowInfo.data as City).name,
+          value: (masterRowInfo.data as City).ciud_Id,
         },
       },
       ...(filterValue || []),
@@ -138,8 +83,7 @@ const fetchDevelopers: DataSourceData<Developer> = ({
             return {
               field: field,
               operator: filter.operator,
-              value:
-                filter.type === "number" ? Number(filter.value) : filter.value,
+              value: filter.type === "number" ? Number(filter.value) : filter.value,
             };
           })
         )
@@ -147,64 +91,58 @@ const fetchDevelopers: DataSourceData<Developer> = ({
   ]
     .filter(Boolean)
     .join("&");
-  return fetch(`${url}?${args}`)
-    .then((res) => res.json())
-    .then((data) => data as Developer[]);
+
+  const apiUrl = 'https://localhost:44380/api/Aldea/FiltrarPorCiudades?alde_Id=';
+  const values = filterValue ? filterValue.map(({ filter }) => filter.value) : [];
+  const hola = args;
+
+  console.log("Los valores son: " + values + hola);
+  try {
+    const response = await axios.get(`${apiUrl}${values}`, {
+      headers: {
+        XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log("La data es:" + response.data);
+    const data = response.data;
+    return data as Aldea[];
+  } catch (error) {
+    console.error("Error fetching developers:", error);
+    return [];
+  }
 };
 
-const domProps: HTMLProps<HTMLDivElement> = {
-  style: {
-    flex: 1,
-  },
-};
-
-type City = {
-  id: number;
-  name: string;
-  country: string;
-};
-
-const cityColumns: InfiniteTablePropColumns<City> = {
-  id: {
-    field: "id",
-    type: "number",
-    header: "ID",
-    defaultWidth: 80,
-    renderRowDetailIcon: true,
-  },
-  city: {
-    field: "name",
-    header: "City",
-  },
-  country: {
-    field: "country",
-    header: "Country",
-  },
-};
-
-function renderDetail() {
+// Función para renderizar detalles
+const renderDetail = () => {
   return (
-    <DataSource<Developer> data={fetchDevelopers} primaryKey="id">
-      <InfiniteTable<Developer>
+    <DataSource<Aldea> data={fetchDevelopers} primaryKey="alde_Id">
+      <InfiniteTable<Aldea>
         columns={columns}
-        domProps={domProps}
+        domProps={{ className: 'flex-1' }}
         columnDefaultWidth={120}
       />
     </DataSource>
   );
-}
+};
 
+// Componente principal
+const CiudadPage = () => {
   return (
-    <Card>
-    <DataSource<City> primaryKey={"id"} data={cities}>
-      <InfiniteTable<City>
-        columns={cityColumns}
-        domProps={domProps}
-        rowDetailRenderer={renderDetail}
-      ></InfiniteTable>
-    </DataSource>
-    </Card>
-  )
-}
-  
-  export default CiudadPage
+      <Card className="p-4 flex-1">
+        <DataSource<City> primaryKey={"ciud_Id"} data={getAldea}>
+          <InfiniteTable<City>
+            columns={cityColumns}
+            domProps={{ className: 'flex-1' }}
+            rowDetailRenderer={renderDetail}
+          />
+        </DataSource>
+      </Card>
+  );
+};
+
+/* CiudadPage.getLayout = function getLayout(page: ReactElement) {
+  return <LayoutAuthenticated>{page}</LayoutAuthenticated>
+} */
+
+export default CiudadPage;
