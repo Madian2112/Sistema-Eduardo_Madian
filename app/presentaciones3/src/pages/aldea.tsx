@@ -95,7 +95,7 @@ const AldeaPage = () => {
             console.log('Success:', response.data);
             setIsModalInfoActive(false);
             fetchAldea(); 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
           } else {
             console.error('Error:', response.statusText);
             toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -111,7 +111,7 @@ const AldeaPage = () => {
             console.log('Success:', response.data);
             setIsModalInfoActive(false);
             fetchAldea(); 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Update successfully`, life: 3000 });
           } else {
             console.error('Error:', response.statusText);
             toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -140,7 +140,7 @@ const AldeaPage = () => {
       setDescripcion(formaEnvio.alde_Nombre);
       setUsuarioCreacion(formaEnvio.usuarioCreacionNombre);
       setFechaCreacion(formaEnvio.alde_FechaCreacion);
-      setUsuarioModificacion(formaEnvio.usuarioModificacionNombre);
+      setUsuarioModificacion(formaEnvio.usuarioModificadorNombre);
       setFechaModificacion(formaEnvio.alde_FechaModificacion);
       setIsExpandedDetails(!isExpandedDetails);
     };

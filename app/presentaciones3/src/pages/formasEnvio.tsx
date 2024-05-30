@@ -80,7 +80,7 @@ const FormasPage = () => {
           console.log('Success:', response.data);
           setIsModalInfoActive(false);
           fetchFormasEnvio(); 
-          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
         } else {
           console.error('Error:', response.statusText);
           toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -96,7 +96,7 @@ const FormasPage = () => {
           console.log('Success:', response.data);
           setIsModalInfoActive(false);
           fetchFormasEnvio(); 
-          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Update successfully`, life: 3000 });
         } else {
           console.error('Error:', response.statusText);
           toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -194,7 +194,7 @@ const FormasPage = () => {
           console.log('Success:', response.data);
           setisModalDeleteActive(false);
           fetchFormasEnvio(); 
-          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Delete successfully`, life: 3000 });
         } else {
           console.error('Error:', response.statusText);
           toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
