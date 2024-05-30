@@ -6,12 +6,20 @@ export class AldeaTabla {
     pvin_Nombre: string;
   }
 
+  export class Insert{
+    alde_Id: number;
+    alde_Nombre: string;
+    ciud_Id: number;
+    usua_UsuarioCreacion: number;
+    alde_FechaCreacion: string;
+  }
+
 export class Aldea{  
-  alde_Id: string
+  alde_Id: number
   alde_Nombre: string
-  ciud_Id: string
+  ciud_Id: number 
   ciud_Nombre: string
-  pvin_Id: string
+  pvin_Id: number
   pvin_Codigo: string
   pvin_Nombre: string
   usua_UsuarioCreacion: number

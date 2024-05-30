@@ -127,34 +127,35 @@ export const getAldea = async () => {
 };
 
 export const sendAldea = async (productData) => {
+  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
   try {
+    console.log("La data que me trae es: " + productData.data)
     const response = await axios.post(
-      API_URL + 'api/Aldea/Insertar',
-      productData,
+      API_URL + 'api/Aldea/Insertar' + productData,
       {
         headers: {
+          XApiKey: apiKey,
           'Content-Type': 'application/json',
-          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
         },
       }
     );
     return response;
   } catch (error) {
-    console.error("Error sending formas envio:", error);
+    console.error("Error sending aldea:", error);
     throw error;
   }
 };
 
 
 export const sendEditAldea = async (productData) => {
+  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
   try {
     const response = await axios.post(
-      API_URL + 'api/Aldea/Editar',
-      productData,
+      API_URL + 'api/Aldea/Editar'+productData,
       {
         headers: {
+          XApiKey: apiKey,
           'Content-Type': 'application/json',
-          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
         },
       }
     );
@@ -249,6 +250,136 @@ export const getCiudades = async () => {
     console.log("La data es");
     console.log(response.data.data);
     const data = response.data.data;
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+//#endregion
+
+//#region Paises
+export const getPaises = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/Paises/Listar?pais_EsAduana=true',
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+//#endregion
+
+//#region PROVINCIAS
+
+
+export const getProvincias = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'aapi/Provincias/Listar?pvin_EsAduana=true',
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+
+
+
+export const getProvinciasPorPaises = async (idpais) => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/Provincias/ProvinciasFiltradaPorPais?pais_Id='+idpais,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+//#endregion
+
+//#region CIUDADESSSS
+export const getCiudadesPorProvincias = async (idprovincia) => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/Ciudades/CiudadesFiltradaPorProvincias?pvin_Id='+idprovincia,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
     return data;
   } catch (error) {
     console.error("Error fetching formas envio:", error);
