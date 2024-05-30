@@ -1,14 +1,11 @@
-export class FormasEnvioViewModel {
-    foen_Id: string;
-    foen_Codigo: string;
-    foen_Descripcion: string;
-    foen_FechaCreacion: string;
-    foen_FechaModificacion: string;
-    usuarioCreacionNombre: string;
-    usuarioModificacionNombre: string;
-    usua_UsuarioCreacion: string;
-    usua_UsuarioModificacion: string;
-    usuarioEliminacionNombre: string;
-    foen_FechaEliminacion: string;
-    foen_Estado: string;
-  }
+export interface FormasEnvioViewModel {
+  foen_Id: number;
+  foen_Codigo: string;
+  foen_Descripcion: string;
+  foen_FechaCreacion: string;
+  foen_FechaModificacion: string;
+  usua_UsuarioCreacion: number;
+  usua_UsuarioModificacion: number;
+  usua_UsuarioEliminacion:number;
+  foen_FechaEliminacion: string;
+}
