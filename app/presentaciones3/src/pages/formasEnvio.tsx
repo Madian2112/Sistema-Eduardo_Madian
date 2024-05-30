@@ -128,6 +128,7 @@ const FormasPage = () => {
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [isExpandedDetails, setIsExpandedDetails] = useState(false);
+  
   const togglePanel = (formaEnvio) => {
     console.log(formaEnvio);
     setIsExpanded(!isExpanded);

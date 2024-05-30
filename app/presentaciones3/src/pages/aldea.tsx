@@ -1,7 +1,8 @@
 import {
   mdiPlus,
   mdiEye, 
-  mdiCity
+  mdiCity, 
+  mdiChartTimelineVariant
 } from '@mdi/js'
 import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
 import Head from 'next/head'
@@ -19,7 +20,7 @@ import * as Yup from 'yup';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 /*import { Dropdown } from 'primereact/dropdown';*/
-import { getAldea, sendDeleteAldea, sendEditAldea, sendAldea, getPaises, getProvinciasPorPaises, getCiudadesPorProvincias } from './apiService/data/components/ApiService';
+import { getAldea, sendEditAldea, sendAldea, getPaises, getProvinciasPorPaises, getCiudadesPorProvincias } from './apiService/data/components/ApiService';
 /*import { FormasEnvioViewMode } from '../interfaces/FormasEnvioViewModel'; */
 import { Aldea } from '../interfaces/AldeaViewModel';
 /*import { AldeaTabla } from '../interfaces/AldeaViewModel'; */
@@ -32,7 +33,6 @@ const AldeaPage = () => {
     //IziToast y Modales
     const [elect, EditOrCreate] = useState('');
     const [isModalInfoActive, setIsModalInfoActive] = useState(false);
-    const [isModalDelete, setisModalDeleteActive] = useState(false);
     const [provincias, setProvincias] = useState([]);
     const [selectedProvincia, setSelectedProvincia] = useState('');
     const [ciudades, setCiudades] = useState([]);
@@ -63,29 +63,28 @@ const AldeaPage = () => {
     });
     //Inicializar Variables
     const [descripcion, setDescripcion] = useState('');
+    const [id, setId] = useState('');
     const [city, setCity] = useState("");
     //Envio
     const Send = async () => {
       const productData: Aldea = {
-        alde_Estado: true, 
-        alde_FechaCreacion: new Date().toISOString(),
-        alde_FechaEliminacion: new Date().toISOString(),
-        alde_FechaModificacion: new Date().toISOString(),
-        alde_Id: 0, 
+        alde_Id: parseFloat(id),
         alde_Nombre: descripcion, 
         ciud_Id: selectedCiudad, 
         ciud_Nombre: "", 
-        pvin_Codigo: "", 
         pvin_Id: 0, 
+        pvin_Codigo: "", 
         pvin_Nombre: "", 
         usua_UsuarioCreacion: 1, 
-        usua_UsuarioEliminacion: 1, 
+        usuarioCreacionNombre: "",
+        alde_FechaCreacion: new Date().toISOString(), 
         usua_UsuarioModificacion: 1, 
-        usuarioCreacionNombre: "", 
-        usuarioModificacionNombre: ""
+        usuarioModificacionNombre: "",
+        alde_FechaModificacion: new Date().toISOString(), 
+        usua_UsuarioEliminacion: 1,
+        alde_FechaEliminacion: new Date().toISOString(),
+        alde_Estado: true,  
       };
-      console.log("El id de la ciudad es: " + selectedCiudad)
-      console.log("La data que se agrega al view model es: "+productData)
       if (elect == "Create") {
         try {
           const response = await sendAldea(productData);
@@ -122,6 +121,39 @@ const AldeaPage = () => {
      
     }
 
+    const [ciudad, setCiudad] = useState('');
+    const [UsuarioCreacion, setUsuarioCreacion] = useState('');
+    const [FechaCreacion, setFechaCreacion] = useState('');
+    const [UsuarioModificacion, setUsuarioModificacion] = useState('');
+    const [FechaModificacion, setFechaModificacion] = useState('');
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpandedDetails, setIsExpandedDetails] = useState(false);
+
+    const togglePanel = (formaEnvio) => {
+      console.log(formaEnvio);
+      setIsExpanded(!isExpanded);
+      setId(formaEnvio.alde_Id)
+      setCiudad(formaEnvio.ciud_Nombre);
+      setDescripcion(formaEnvio.alde_Nombre);
+      setUsuarioCreacion(formaEnvio.usuarioCreacionNombre);
+      setFechaCreacion(formaEnvio.alde_FechaCreacion);
+      setUsuarioModificacion(formaEnvio.usuarioModificacionNombre);
+      setFechaModificacion(formaEnvio.alde_FechaModificacion);
+      setIsExpandedDetails(!isExpandedDetails);
+    };
+
+    const togglePanelDetails = () => {
+      setIsExpanded(!isExpanded);
+      setId("")
+      setCiudad("");
+      setDescripcion("");
+      setUsuarioCreacion("");
+      setFechaCreacion("");
+      setUsuarioModificacion("");
+      setFechaModificacion("");
+      setIsExpandedDetails(!isExpandedDetails);
+    };
+
     //Hooks Almacenar Datos
     const [Aldea, setAldea] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -148,6 +180,7 @@ const AldeaPage = () => {
     const handleEdit = (formaEnvio) => {
       EditOrCreate("Edit")
       console.log(formaEnvio)
+      setId(formaEnvio.alde_Id)
       setDescripcion(formaEnvio.alde_Nombre);
       setSelectedCiudad(formaEnvio.ciud_Id)
       setSelectedProvincia(formaEnvio.pvin_Id)
@@ -158,46 +191,6 @@ const AldeaPage = () => {
       setDescripcion(formaEnvio.foen_Descripcion);
       setisModalDeleteActive(true);
     }; */
-
-    const Delete = async () => {
-      const productData: Aldea = {
-        alde_Estado: true, 
-        alde_FechaCreacion: new Date().toISOString(),
-        alde_FechaEliminacion: new Date().toISOString(),
-        alde_FechaModificacion: new Date().toISOString(),
-        alde_Id: 0, 
-        alde_Nombre: descripcion, 
-        ciud_Id: selectedCiudad, 
-        ciud_Nombre: "", 
-        pvin_Codigo: "", 
-        pvin_Id: 0, 
-        pvin_Nombre: "", 
-        usua_UsuarioCreacion: 1, 
-        usua_UsuarioEliminacion: 1, 
-        usua_UsuarioModificacion: 1, 
-        usuarioCreacionNombre: "", 
-        usuarioModificacionNombre: ""
-      };
-      console.log(productData)
-
-        try {
-          const response = await sendDeleteAldea(productData);
-          if (response.status === 200) {
-            console.log('Success:', response.data);
-            setisModalDeleteActive(false);
-            fetchAldea(); 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
-          } else {
-            console.error('Error:', response.statusText);
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
-        }
-
- 
-    };
 
         /*PARA LOS PAISES */
       useEffect(() => {
@@ -382,71 +375,67 @@ const AldeaPage = () => {
       >
         <Column field="alde_Id" header="Id" sortable />
         <Column field="alde_Nombre" header="Aldea" sortable />
-        <Column field="ciud_Id" header="Ciudad ID" sortable />
         <Column field="ciud_Nombre" header="Ciudad" sortable />
-        <Column field="pvin_Id" header="Provincia ID" sortable />
         <Column 
          body={rowData => (
           <div className='flex gap-3.5 justify-center'>
             <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-            <Button color="info" label="Detalles" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
+            <Button color="info" label="Detalles" icon={mdiEye} onClick={() => togglePanel(rowData)} small />
           </div>
         )} />
       </DataTable>
-      <div className="p-4">
-          <table className="w-full mb-6 text-center">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-center">Code</th>
-                <th className=" px-4 py-2 text-center">Description</th>
-                <th className=" px-4 py-2 text-center">Creation</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className=" px-4 py-2 text-center">12</td>
-                <td className=" px-4 py-2 text-center" >Con</td>
-                <td className=" px-4 py-2 text-center">{new Date().toLocaleDateString()}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border px-4 py-2">Action</th>
-                <th className="border px-4 py-2">User</th>
-                <th className="border px-4 py-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border px-4 py-2">Edit</td>
-                <td className="border px-4 py-2">Admin</td>
-                <td className="border px-4 py-2">{new Date().toLocaleDateString()}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-    <CardBoxModal
-    title="Delete"
-    buttonColor="info"
-    buttonLabel="Add"
-    isActive={isModalDelete}
-    onConfirm={handleModalAction}
-    onCancel={handleModalAction}
-  >
-
-<div className="text-center mb-4">
-          <p>Are you sure you want to delete?</p>
-        </div>
-        <div className="flex justify-center gap-4">
-          <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
-          <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onClick={() => setisModalDeleteActive(false)}>No</button>
-        </div>
-  </CardBoxModal>
         </SectionMain>
+        {isExpandedDetails && (
+      <SectionMain>
+        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Aldea Details" main>
+        </SectionTitleLineWithButton>
+
+    <div className="p-4">
+        <table className="w-full ">
+          <thead>
+            <tr>
+            <th className="px-4 py-2 ">Id</th>
+              <th className="px-4 py-2 ">Village</th>
+              <th className=" px-4 py-2 ">City</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+            <td className=" px-4 py-2 ">{id}</td>
+              <td className=" px-4 py-2 ">{descripcion}</td>
+              <td className=" px-4 py-2 " >{ciudad}</td>
+            </tr>
+          </tbody>
+        </table>
+
+
+            <h2>Auditoria</h2>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2">Action</th>
+              <th className="border px-4 py-2">User</th>
+              <th className="border px-4 py-2">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-4 py-2">Create</td>
+              <td className="border px-4 py-2">{UsuarioCreacion}</td>
+              <td className="border px-4 py-2">{FechaCreacion}</td>
+            </tr>
+            <tr>
+              <td className="border px-4 py-2">Edit</td>
+              <td className="border px-4 py-2">{UsuarioModificacion}</td>
+              <td className="border px-4 py-2">{FechaModificacion}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <Button color="info" label="Cancel" icon={mdiEye} onClick={() => togglePanelDetails() } small/>
+      </SectionMain>
+       )}
       </>
     )
 }
