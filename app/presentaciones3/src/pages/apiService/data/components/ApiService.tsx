@@ -425,44 +425,44 @@ export const getCiudadesPorProvincias = async (idprovincia) => {
     return [];
   }
 };
-          
-export const sendAldea = async (productData) => {
-  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
-  try {
-    console.log("La data que me trae es: " + productData.data)
-    const response = await axios.post(
-      API_URL + 'api/Aldea/Insertar' + productData,
-      {
-        headers: {
-          XApiKey: apiKey,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error sending aldea:", error);
 
-    throw error;
-  }
-};
-    
-export const sendEditAldea = async (productData) => {
-  const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+export const sendAldea = async (productData) => {
   try {
     const response = await axios.post(
-      API_URL + 'api/Aldea/Editar'+productData,
+      API_URL + 'api/Aldea/Insertar',
+      productData,
       {
         headers: {
-          XApiKey: apiKey,
           'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
         },
       }
     );
     return response;
   } catch (error) {
+
     console.error("Error sending formas envio:", error);
     throw error;
   }
 };
+
+export const sendEditAldea = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/Aldea/Editar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};    
 //#endregion

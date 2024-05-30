@@ -1,148 +1,104 @@
-import * as React from "react";
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import axios from 'axios';
-import { InfiniteTable, DataSource, InfiniteTablePropColumns, DataSourceData } from "@infinite-table/infinite-react";
-import { Card } from "primereact/card";
-import { getAldea } from './apiService/data/components/ApiService';
-/*import LayoutAuthenticated from '../layouts/Authenticated';
-import type { ReactElement } from 'react';*/
+import { getPageTitle } from '../config';
+import { DataTable} from 'primereact/datatable';
+import { Column } from 'primereact/column';
+/*import { Card } from "primereact/card";*/
+import { /*getAldea,*/ getCiudades } from './apiService/data/components/ApiService';
+import LayoutAuthenticated from '../layouts/Authenticated';
+import type { ReactElement } from 'react';
+import SectionMain from "../components/Section/Main";
+import SectionTitleLineWithButton from "../components/Section/TitleLineWithButton";
+import { mdiChartTimelineVariant } from "@mdi/js";
 
-// Tipos de datos
-type Aldea = {
-  alde_Id: string;
-  alde_Nombre: string;
-  ciud_Id: string;
-  ciud_Nombre: string;
-  pvin_Id: string;
-  pvin_Codigo: string;
-  pvin_Nombre: string;
-};
-
-type City = {
-  ciud_Id: number;
-  ciud_Nombre: string;
-  pvin_Nombre: string;
-};
-
-// Configuración de columnas
-const columns: InfiniteTablePropColumns<Aldea> = {
-  alde_Id: {
-    field: "alde_Id",
-    header: "ID",
-    defaultWidth: 60,
-    resizable: false,
-    type: "number",
-  },
-  firstName: {
-    field: "alde_Nombre",
-    header: "Aldea",
-  },
-  ciud_Nombre: {
-    field: "ciud_Nombre",
-    defaultHiddenWhenGroupedBy: true,
-  },
-};
-
-const cityColumns: InfiniteTablePropColumns<City> = {
-  id: {
-    field: "ciud_Id",
-    type: "number",
-    header: "ID",
-    defaultWidth: 80,
-    renderRowDetailIcon: true,
-  },
-  city: {
-    field: "ciud_Nombre",
-    header: "City",
-  },
-  country: {
-    field: "pvin_Nombre",
-    header: "Country",
-  },
-};
-
-// Función para obtener datos
-const fetchDevelopers: DataSourceData<Aldea> = async ({ filterValue, masterRowInfo }) => {
-  if (masterRowInfo) {
-    filterValue = [
-      {
-        field: "ciud_Id",
-        filter: {
-          operator: "eq",
-          type: "string",
-          value: (masterRowInfo.data as City).ciud_Id,
-        },
-      },
-      ...(filterValue || []),
-    ];
-  }
-  const args = [
-    filterValue
-      ? "filterBy=" +
-        JSON.stringify(
-          filterValue.map(({ field, filter }) => {
-            return {
-              field: field,
-              operator: filter.operator,
-              value: filter.type === "number" ? Number(filter.value) : filter.value,
-            };
-          })
-        )
-      : null,
-  ]
-    .filter(Boolean)
-    .join("&");
-
-  const apiUrl = 'https://localhost:44380/api/Aldea/FiltrarPorCiudades?alde_Id=';
-  const values = filterValue ? filterValue.map(({ filter }) => filter.value) : [];
-  const hola = args;
-
-  console.log("Los valores son: " + values + hola);
-  try {
-    const response = await axios.get(`${apiUrl}${values}`, {
-      headers: {
-        XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
-        'Content-Type': 'application/json',
-      },
-    });
-    console.log("La data es:" + response.data);
-    const data = response.data;
-    return data as Aldea[];
-  } catch (error) {
-    console.error("Error fetching developers:", error);
-    return [];
-  }
-};
-
-// Función para renderizar detalles
-const renderDetail = () => {
-  return (
-    <DataSource<Aldea> data={fetchDevelopers} primaryKey="alde_Id">
-      <InfiniteTable<Aldea>
-        columns={columns}
-        domProps={{ className: 'flex-1' }}
-        columnDefaultWidth={120}
-      />
-    </DataSource>
-  );
-};
-
-// Componente principal
 const CiudadPage = () => {
+  const [expandedRows, setExpandedRows] = useState(null);
+  const [cities, setCities] = useState([]);
+  const [aldeas, setAldeas] = useState([]);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const response = await getCiudades();
+        console.log(response)
+        setCities(response);
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  const fetchAldeas = async (ciud_Id) => {
+    const apiUrl = 'https://localhost:44380/api/Aldea/FiltrarPorCiudades?alde_Id=';
+    try {
+      const response = await axios.get(`${apiUrl}${ciud_Id}`, {
+        headers: {
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("LA DATA ES:")
+      console.log(response.data.data)
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching aldeas:", error);
+      return [];
+    }
+  };
+
+  const onRowExpand = async (event) => {
+    const ciud_Id = event.data.ciud_Id;
+    console.log("EL DATA ID ES")
+    console.log(ciud_Id)
+    const aldeasData = await fetchAldeas(ciud_Id);
+    setAldeas((prevAldeas) => ({
+      ...prevAldeas,
+      [ciud_Id]: aldeasData,
+    }));
+  };
+
+  const rowExpansionTemplate = (data) => {
+    const aldeasData = aldeas[data.ciud_Id] || [];
+    return (
+      <DataTable value={aldeasData} responsiveLayout="scroll">
+        <Column field="alde_Id" header="ID" />
+        <Column field="alde_Nombre" header="Aldea" />
+      </DataTable>
+    );
+  };
+
+  const header = <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Data Master" main />;
+
   return (
-      <Card className="p-4 flex-1">
-        <DataSource<City> primaryKey={"ciud_Id"} data={getAldea}>
-          <InfiniteTable<City>
-            columns={cityColumns}
-            domProps={{ className: 'flex-1' }}
-            rowDetailRenderer={renderDetail}
-          />
-        </DataSource>
-      </Card>
+    <>
+      <Head>
+        <title>{getPageTitle('Departamento')}</title>
+      </Head>
+      <SectionMain>
+        {header}
+        <div className="table-container">
+          <DataTable value={cities} 
+        responsiveLayout="scroll"
+        paginator 
+        rows={10} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)}
+            onRowExpand={onRowExpand} rowExpansionTemplate={rowExpansionTemplate} dataKey="ciud_Id"
+            tableStyle={{ minWidth: '60rem' }}>
+            <Column expander style={{ width: '5rem' }} />
+            <Column field="ciud_Id" header="Id" sortable />
+            <Column field="ciud_Nombre" header="City" sortable />
+            <Column field="pvin_Nombre" header="Province" sortable />
+          </DataTable>
+        </div>
+      </SectionMain>
+    </>
   );
 };
 
-/* CiudadPage.getLayout = function getLayout(page: ReactElement) {
+CiudadPage.getLayout = function getLayout(page: ReactElement) {
   return <LayoutAuthenticated>{page}</LayoutAuthenticated>
-} */
+}
 
 export default CiudadPage;
