@@ -2,7 +2,10 @@ import {
   mdiPlus,
   mdiEye, 
   mdiCity, 
-  mdiChartTimelineVariant
+  mdiChartTimelineVariant,
+  mdiAppleKeyboardControl,
+  mdiBorderColor,
+  mdiDetails
 } from '@mdi/js'
 import { Formik, Form, Field, /*ErrorMessage*/ } from 'formik';
 import Head from 'next/head'
@@ -92,7 +95,7 @@ const AldeaPage = () => {
             console.log('Success:', response.data);
             setIsModalInfoActive(false);
             fetchAldea(); 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
           } else {
             console.error('Error:', response.statusText);
             toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -108,7 +111,7 @@ const AldeaPage = () => {
             console.log('Success:', response.data);
             setIsModalInfoActive(false);
             fetchAldea(); 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: `Update successfully`, life: 3000 });
           } else {
             console.error('Error:', response.statusText);
             toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -137,7 +140,7 @@ const AldeaPage = () => {
       setDescripcion(formaEnvio.alde_Nombre);
       setUsuarioCreacion(formaEnvio.usuarioCreacionNombre);
       setFechaCreacion(formaEnvio.alde_FechaCreacion);
-      setUsuarioModificacion(formaEnvio.usuarioModificacionNombre);
+      setUsuarioModificacion(formaEnvio.usuarioModificadorNombre);
       setFechaModificacion(formaEnvio.alde_FechaModificacion);
       setIsExpandedDetails(!isExpandedDetails);
     };
@@ -281,7 +284,6 @@ const AldeaPage = () => {
     onConfirm={handleModalAction}
     onCancel={handleModalAction}
   >
-    
     <Formik
       initialValues={{
         alde_Nombre: descripcion,
@@ -311,9 +313,9 @@ const AldeaPage = () => {
       {touched.alde_Nombre && errors.alde_Nombre && <div className="text-red-500 text-xs mt-1">{errors.alde_Nombre}</div>}
     </div>
 
-    <div className="flex flex-col mr-3 flex-1">
+    <div className="flex flex-col mr-3 flex-1 w-56">
     <label htmlFor="pais" className="mb-2">Selecciona un País</label>
-    <select id="pais" name="pais_Id" value={selectedPais} onChange={ handleChange } className="p-dropdown">
+    <select id="pais" name="pais_Id" value={selectedPais} onChange={ handleChange } className="p-dropdown border-gray-300">
         <option value="0">Seleccione</option>
         {paises.map((pais) => (
           <option key={pais.pais_Id} value={pais.pais_Id} className="p-dropdown-item">{pais.pais_Nombre}</option>
@@ -326,7 +328,7 @@ const AldeaPage = () => {
 
     <div className="flex flex-col mr-3 flex-1">
     <label htmlFor="pais" className="mb-2">Selecciona un Provincia</label>
-    <select id="provincia" value={selectedProvincia} onChange={handleChanges} className="p-dropdown">
+    <select id="provincia" value={selectedProvincia} onChange={handleChanges} className="p-dropdown  border-gray-300">
         <option value="">Seleccione</option>
         {provincias.map((provincia) => (
           <option key={provincia.pvin_Id} value={provincia.pvin_Id} className="p-dropdown-item">{provincia.pvin_Nombre}</option>
@@ -336,7 +338,7 @@ const AldeaPage = () => {
 
     <div className="flex flex-col mr-3 flex-1">
     <label htmlFor="pais" className="mb-2">Selecciona una Ciudad</label>
-    <select id="ciud_Id" name="ciud_Id" value={selectedCiudad} onChange={handleChangess} className="p-dropdown">
+    <select id="ciud_Id" name="ciud_Id" value={selectedCiudad} onChange={handleChangess} className="p-dropdown  border-gray-300">
         <option value="">Seleccione</option>
         {ciudades.map((ciudad) => (
           <option key={ciudad.ciud_Id} value={ciudad.ciud_Id} className="p-dropdown-item">{ciudad.ciud_Nombre}</option>
@@ -359,10 +361,10 @@ const AldeaPage = () => {
         <Head>
           <title>{getPageTitle('Departamento')}</title>
         </Head>
+      {isExpanded && (   
         <SectionMain>
           <SectionTitleLineWithButton icon={mdiCity} title="Aldea" main>
           </SectionTitleLineWithButton>
-    
     <Button color="info" label="Add" icon={mdiPlus} onClick={() => handleModalCreate() } small/>
 
       <DataTable 
@@ -378,12 +380,13 @@ const AldeaPage = () => {
         <Column 
          body={rowData => (
           <div className='flex gap-3.5 justify-center'>
-            <Button color="info" label="Editar" icon={mdiEye} onClick={() => handleEdit(rowData)} small />
-            <Button color="info" label="Detalles" icon={mdiEye} onClick={() => togglePanel(rowData)} small />
+            <Button color="info" label="Editar" icon={mdiBorderColor} onClick={() => handleEdit(rowData)} small />
+            <Button color="success" label="Detalles" icon={mdiDetails} onClick={() => togglePanel(rowData)} small />
           </div>
         )} />
       </DataTable>
         </SectionMain>
+      )}
         {isExpandedDetails && (
       <SectionMain>
         <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Aldea Details" main>
@@ -408,7 +411,7 @@ const AldeaPage = () => {
         </table>
 
 
-            <h2>Auditoria</h2>
+        <h2 className='font-extrabold ml-1 mt-1 mb-1'>Auditoria</h2>
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -432,7 +435,7 @@ const AldeaPage = () => {
         </table>
       </div>
 
-      <Button color="info" label="Cancel" icon={mdiEye} onClick={() => togglePanelDetails() } small/>
+      <Button color="info" label="Cancel" icon={mdiAppleKeyboardControl} onClick={() => togglePanelDetails() } small/>
       </SectionMain>
        )}
       </>
