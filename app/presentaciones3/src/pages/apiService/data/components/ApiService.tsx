@@ -499,8 +499,8 @@ export const getEmpleados = async () => {
 };
 //#endregion
 
-//#region Pedidos PRODUCCION
-export const getPedidosOrden = async () => {
+//#region Pedidos Produccion
+export const getPedidosProduccion = async () => {
   console.log("Full URL:", API_URL);
   console.log("ENTRO AQUI");
   try {
@@ -549,6 +549,58 @@ export const sendPedidosProduccion = async (productData) => {
   }
 };
 
+//#endregion
+
+//#region Pedidos Produccion Detalle 
+
+export const getPedidosProduccionDetalle = async (ppr_Id) => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/PedidosProduccionDetalles/Filtrar?ppro_Id='+ppr_Id,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+
+export const sendPedidosProduccionDetalle = async (productData) => {
+  try {
+    const response = await axios.post(
+      'https://localhost:44380/api/PedidosProduccionDetalles/Insertar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
 //#endregion
 
 //#region LOTEEE

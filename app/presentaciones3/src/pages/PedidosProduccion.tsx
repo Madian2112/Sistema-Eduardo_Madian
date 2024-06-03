@@ -3,7 +3,8 @@ import {
     mdiTrendingNeutral, 
     mdiClose,
     mdiCheck, 
-    mdiEye
+    mdiEye,
+/*    mdiConsoleNetworkOutline*/
 } from '@mdi/js'
 import LayoutAuthenticated from '../layouts/Authenticated'
 import type { ReactElement } from 'react'
@@ -17,8 +18,9 @@ import SectionTitleLineWithButton from '../components/Section/TitleLineWithButto
 import { Formik, Form, Field } from 'formik';
 import { TabView, TabPanel } from 'primereact/tabview';
 import * as Yup from 'yup';
-import { getEmpleados, getPedidosOrden, getLotes, getLotesStock, sendPedidosProduccion } from './apiService/data/components/ApiService';
+import { getEmpleados, getPedidosProduccion, getLotes, getLotesStock, sendPedidosProduccion, sendPedidosProduccionDetalle, getPedidosProduccionDetalle } from './apiService/data/components/ApiService';
 import { PedidosProduccionViewModel } from '../interfaces/PedidoProduccionViewModel';
+import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProduccionDetalleViewModel';
 import { Toast } from 'primereact/toast';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -35,8 +37,10 @@ const PedidosProduccionPage = () => {
     const [ppro_Fecha, setppro_Fecha] = useState('');
     const [ppr_Observaciones, setppr_Observaciones] = useState('');
     const [lote_Stock, setlote_Stock] = useState('');
-    const [ppde_Cantidad, setppde_Cantidad] = useState('')
+    const [ppde_Cantidad, setppde_Cantidad] = useState(0)
     const [DataDDL, setDataDDL] = useState([]);
+    const [ppro_Id, setppro_Id] = useState(0);
+    const [tableppd, settableppd ] = useState(false);
 
     const validationSchema = Yup.object().shape({
         ppro_Fecha: Yup.string().required('Date is required'),
@@ -61,7 +65,7 @@ const PedidosProduccionPage = () => {
             ppro_Finalizado: false,
             usua_UsuarioCreacion:1,
             lote_Id: parseInt(DataDDL[0].lote_Id),
-            ppde_Cantidad: parseInt(ppde_Cantidad),
+            ppde_Cantidad: ppde_Cantidad,
             UsuarioCreacionNombre: "",
             ppro_FechaCreacion: new Date().toISOString(),
             usua_UsuarioModificacion: 1,
@@ -71,43 +75,116 @@ const PedidosProduccionPage = () => {
             detalles:"",
             mensaje: "",
         };
-        console.log(productData)
-        if(ppde_Cantidad > DataDDL[0].lote_Stock){
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
+
+        const ppDetalle: PedidosProduccionDetalleViewModel = {
+            ppde_Id: 1,
+            ppro_Id:  ppro_Id, 
+            lote_Id: DataDDL[0].lote_Id,
+            lote_Stock: lote_Stock, 
+            lote_CodigoLote: "hola",
+            ppde_Cantidad: ppde_Cantidad,
+            mate_Id: 1,
+            mate_Descripcion: "hola", 
+            colr_Codigo: "hola", 
+            colr_Nombre: "hola", 
+            tipa_Id: 1, 
+            tipa_area: "hola", 
+            ppro_Estados: "hola", 
+            usua_UsuarioCreacion: 1, 
+            usuarioCreacionNombre: "hola", 
+            ppde_FechaCreacion: new Date(), 
+            usua_UsuarioModificacion: 1, 
+            ppde_FechaModificacion: new Date(), 
+            usuarioModificacionNombre: "hola",
+            ppde_Estado: true,
         }
 
-        else if(ppde_Cantidad < DataDDL[0].lote_Stock) 
+        console.log(productData)
+
+        if(ppde_Cantidad == 0 || selectedLotes == '' || selectedLotes == "0" || lote_CodigoLote == '' || lote_Stock == '' )
         {
-          try {
-            const response = await sendPedidosProduccion(productData);
-            console.log("Lo que me retorna es: ")
-            console.log(response);
-            console.log("El ultimo id es: ")
-            console.log(response.data.data.messageStatus)
-            if (response.status === 200) {
-              console.log('Success:', response.data);
-              toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
-            } else {
-              console.error('Error:', response.statusText);
-              toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
-          }
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `No se aceptan campos vacios`, life: 3000 });   
         }
-       
+
+        else if(ppde_Cantidad != 0 && selectedLotes != '' && selectedLotes != "0" && lote_CodigoLote != '' && lote_Stock != '' )
+        {
+            if(ppde_Cantidad > DataDDL[0].lote_Stock){
+                toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
+            }
+    
+            else if(ppde_Cantidad < DataDDL[0].lote_Stock) 
+            {
+
+                if(ppro_Id == 0)
+                {
+                    try {
+                        const response = await sendPedidosProduccion(productData);
+                        console.log(response.data.data.messageStatus);
+                        ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
+                        setppro_Id(response.data.data.messageStatus)
+                        console.log("El id es: " +  ppDetalle.ppro_Id)
+                        const responses = await sendPedidosProduccionDetalle(ppDetalle);
+                        fetchPedidosProduccionDetalles(response.data.data.messageStatus);
+                        settableppd(true);
+                        if (response.status === 200 && responses.status === 200) {
+                          console.log('Success:', response.data);
+                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+                        } else {
+                          console.error('Error:', response.statusText);
+                          toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                        }
+                      } catch (error) {
+                        console.error('Error:', error);
+                        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
+                      }
+                }
+
+                else if(ppro_Id != 0)
+                {
+                    try {
+                        console.log("Hola hola")
+                        console.log("El id de ppro es:")
+                        console.log(ppro_Id);
+                        ppDetalle.ppro_Id = ppro_Id;
+                        console.log(ppDetalle);
+                        const response = await sendPedidosProduccionDetalle(ppDetalle);
+                        fetchPedidosProduccionDetalles(ppro_Id);
+                        settableppd(true);
+                        if (response.status === 200) {
+                          console.log('Success:', response.data);
+                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+                        } else {
+                          console.error('Error:', response.statusText);
+                          toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                        }
+                      } catch (error) {
+                        console.error('Error:', error);
+                        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+                      }
+                }
+            }
+        }
       }
+
+    useEffect(() => {
+    }, [setppro_Id]);
 
       //#endregion
 
     const togglePanel = () => {
+        setppro_Id(0);
         setIsExpanded(!isExpanded);
         setIsExpandedDetails(!isExpandedDetails);
         setButtonExpanded(false);
         setActiveIndex(0);  // Cambia al segundo TabPanel
         setTable(false);
     };
+
+    useEffect(() => {
+    }, [setppro_Id]);
+
+    useEffect(() =>{
+    }, [setActiveIndex]);
 
     const togglePanelDetails = () => {
         setIsExpanded(!isExpanded);
@@ -130,6 +207,10 @@ const PedidosProduccionPage = () => {
                 setActiveIndex(1);  // Cambia al segundo TabPanel
             }
     };
+
+    useEffect(() =>{
+    }, [setActiveIndex]);
+
 
     //#region  DDL EMPLEADOS
     useEffect(() => {
@@ -199,13 +280,31 @@ const PedidosProduccionPage = () => {
       }, [selectedEmpleados]);
 
 
+      //#region Table Pedidos Prod. Detalle
+      const [PedidosProduccionDetalle, setPedidosProduccionDetalle] = useState([]);
+      const fetchPedidosProduccionDetalles= async (ppr_Id) => {
+        setLoading(true);
+        try {
+          const data = await getPedidosProduccionDetalle(ppr_Id);
+          setPedidosProduccionDetalle(data);
+          setLoading(false);
+        } catch (error) {
+          toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch formas envio', life: 3000 });
+          setLoading(false);
+        }
+      };
+  
+      useEffect(() => {
+      }, [setPedidosProduccionDetalle]);
+
+      //#region Tabla de Pedidos Prod.
       const [PedidosOrden, setPedidosOrden] = useState([]);
       const [loading, setLoading] = useState(false);
 
       const fetchPedidosOrden= async () => {
         setLoading(true);
         try {
-          const data = await getPedidosOrden();
+          const data = await getPedidosProduccion();
           setPedidosOrden(data);
           setLoading(false);
         } catch (error) {
@@ -261,8 +360,7 @@ const PedidosProduccionPage = () => {
             {isExpandedDetails && (
                 <div className="" style={{ marginLeft: '2.0em', marginRight: '2.0em' }}>
                 <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-
-                <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header I</div>} disabled={activeIndex !== 0}>
+                <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header I</div>} disabled={activeIndex == 1}>
                             <Card className="md:w-25rem">
                                 <SectionMain>
                                     <Formik
@@ -337,7 +435,7 @@ const PedidosProduccionPage = () => {
                                 </SectionMain>
                             </Card>
                         </TabPanel>
-                        <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header II</div>} disabled={activeIndex !== 1}>
+                        <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header II</div>} disabled={activeIndex == 0}>
                             <Card className="md:w-25rem">
                                 <SectionMain>
                                     <Formik
@@ -416,7 +514,30 @@ const PedidosProduccionPage = () => {
                                     </style>
                                 </SectionMain>
                             </Card>
+                            {tableppd &&(
+                    <DataTable 
+                    value={PedidosProduccionDetalle} 
+                    loading={loading} 
+                    responsiveLayout="scroll"
+                    paginator 
+                    rows={10}
+                    >
+                    <Column field="ppde_Id" header="ID" sortable />
+                    <Column field="mate_Descripcion" header="Material" sortable />
+                    <Column field="lote_Stock" header="Stock" sortable />
+                    <Column field="colr_Nombre" header="Color" sortable />
+                    <Column field="tipa_area" header="Area" sortable />
+                    <Column 
+                    body={rowData => (
+                    <div className='flex gap-3.5 justify-center'>
+                        <Button color="info" label="Editar" icon={mdiEye} onClick={() => holamundo(rowData)} small />
+                        <Button color="info" label="Detalles" icon={mdiEye} small />
+                    </div>
+                    )} />
+                    </DataTable>
+                            )}
                         </TabPanel>
+                        #endregion
                     </TabView>
                 </div>
             )}
