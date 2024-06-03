@@ -4,6 +4,7 @@ import {
     mdiClose,
     mdiCheck, 
     mdiEye,
+    mdiDotsVertical
 /*    mdiConsoleNetworkOutline*/
 } from '@mdi/js'
 import LayoutAuthenticated from '../layouts/Authenticated'
@@ -24,7 +25,7 @@ import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProducci
 import { Toast } from 'primereact/toast';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-
+import { Menu } from 'primereact/menu';
 
 const PedidosProduccionPage = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -41,6 +42,24 @@ const PedidosProduccionPage = () => {
     const [DataDDL, setDataDDL] = useState([]);
     const [ppro_Id, setppro_Id] = useState(0);
     const [tableppd, settableppd ] = useState(false);
+    const [labelButton, setLabelButton] = useState("Save")
+    const items = [
+        {
+            label: 'Options',
+            items: [
+                {
+                    label: 'Refresh',
+                    icon: 'pi pi-refresh'
+                },
+                {
+                    label: 'Export',
+                    icon: 'pi pi-upload'
+                }
+            ]
+        }
+    ];
+    const menuLeft = useRef(null);
+
 
     const validationSchema = Yup.object().shape({
         ppro_Fecha: Yup.string().required('Date is required'),
@@ -49,7 +68,7 @@ const PedidosProduccionPage = () => {
     });
 
     const [empleados, setEmpleados] = useState([]);
-    const [selectedEmpleados, setSelectedEmpleados] = useState('');
+    const [selectedEmpleados, setSelectedEmpleados] = useState("");
     const [lotes, setLotes] = useState([]);
     const [selectedLotes, setSelectedLotes] = useState('');
 
@@ -80,7 +99,7 @@ const PedidosProduccionPage = () => {
             ppde_Id: 1,
             ppro_Id:  ppro_Id, 
             lote_Id: DataDDL[0].lote_Id,
-            lote_Stock: lote_Stock, 
+            lote_Stock: lote_Stock.toString(), 
             lote_CodigoLote: "hola",
             ppde_Cantidad: ppde_Cantidad,
             mate_Id: 1,
@@ -92,9 +111,9 @@ const PedidosProduccionPage = () => {
             ppro_Estados: "hola", 
             usua_UsuarioCreacion: 1, 
             usuarioCreacionNombre: "hola", 
-            ppde_FechaCreacion: new Date(), 
+            ppde_FechaCreacion: new Date().toISOString(), 
             usua_UsuarioModificacion: 1, 
-            ppde_FechaModificacion: new Date(), 
+            ppde_FechaModificacion: new Date().toISOString(), 
             usuarioModificacionNombre: "hola",
             ppde_Estado: true,
         }
@@ -123,10 +142,20 @@ const PedidosProduccionPage = () => {
                         ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
                         setppro_Id(response.data.data.messageStatus)
                         console.log("El id es: " +  ppDetalle.ppro_Id)
+                        console.log("Los datos de ppDetall es: ");
+                        console.log(ppDetalle);
+
                         const responses = await sendPedidosProduccionDetalle(ppDetalle);
+
                         fetchPedidosProduccionDetalles(response.data.data.messageStatus);
+
                         settableppd(true);
                         if (response.status === 200 && responses.status === 200) {
+                            setppde_Cantidad(0);
+                            setSelectedLotes("0");
+                            setlote_Stock('');
+                            setlote_CodigoLote('')
+
                           console.log('Success:', response.data);
                           toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
                         } else {
@@ -166,10 +195,52 @@ const PedidosProduccionPage = () => {
         }
       }
 
+      useEffect(() => {
+    }, [setppde_Cantidad]);
+
+    useEffect(() => {
+    }, [setSelectedLotes]);
+
+    useEffect(() => {
+    }, [setlote_Stock]);
+
+    useEffect(() => {
+    }, [setlote_CodigoLote]);
+
+    useEffect(() =>{
+    }, [setLotes]);
+
     useEffect(() => {
     }, [setppro_Id]);
 
       //#endregion
+
+    const EditTable = (rowData) => {
+        setSelectedLotes(rowData.lote_CodigoLote);
+        setlote_Stock(rowData.lote_Stock);
+        setlote_CodigoLote(rowData.lote_CodigoLote);
+        setppde_Cantidad(rowData.ppde_Cantidad);
+        setppro_Id(rowData.ppro_Id)
+        setLabelButton("Edit");
+    } 
+
+    useEffect(() =>{
+    }, [setLabelButton])
+
+    useEffect(() => {
+    }, [setppde_Cantidad]);
+
+    useEffect(() => {
+    }, [setSelectedLotes]);
+
+    useEffect(() => {
+    }, [setlote_Stock]);
+
+    useEffect(() => {
+    }, [setlote_CodigoLote]);
+
+    useEffect(() => {
+    }, [setppro_Id]);
 
     const togglePanel = () => {
         setppro_Id(0);
@@ -503,7 +574,7 @@ const PedidosProduccionPage = () => {
                                         )}
                                     </Formik>
                                     <div className='botones'>
-                                        <Button color="success" label="Okey " icon={mdiCheck} onClick={() => Send()} small />
+                                        <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />
                                     </div>
                                     <style jsx>{`
                                         .botones {
@@ -521,6 +592,7 @@ const PedidosProduccionPage = () => {
                     responsiveLayout="scroll"
                     paginator 
                     rows={10}
+                    style={{ marginTop: '20px' }}
                     >
                     <Column field="ppde_Id" header="ID" sortable />
                     <Column field="mate_Descripcion" header="Material" sortable />
@@ -530,8 +602,7 @@ const PedidosProduccionPage = () => {
                     <Column 
                     body={rowData => (
                     <div className='flex gap-3.5 justify-center'>
-                        <Button color="info" label="Editar" icon={mdiEye} onClick={() => holamundo(rowData)} small />
-                        <Button color="info" label="Detalles" icon={mdiEye} small />
+                        <Button color="success" label="Edit" icon={mdiEye} onClick={() => EditTable(rowData)} small />
                     </div>
                     )} />
                     </DataTable>
@@ -548,5 +619,9 @@ const PedidosProduccionPage = () => {
 PedidosProduccionPage.getLayout = function getLayout(page: ReactElement) {
     return <LayoutAuthenticated>{page}</LayoutAuthenticated>
 }
+
+/*                        <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
+                        <Button color="success" label="" icon={mdiDotsVertical} className="mr-2" onClick={(event) => menuLeft.current.toggle(event)} aria-controls="popup_menu_left" aria-haspopup />
+                     */
 
 export default PedidosProduccionPage
