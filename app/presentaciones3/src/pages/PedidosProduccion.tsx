@@ -4,7 +4,8 @@ import {
     mdiClose,
     mdiCheck, 
     mdiEye,
-    mdiDotsVertical
+    mdiDotsVertical, 
+    mdiCancel
 /*    mdiConsoleNetworkOutline*/
 } from '@mdi/js'
 import LayoutAuthenticated from '../layouts/Authenticated'
@@ -19,7 +20,7 @@ import SectionTitleLineWithButton from '../components/Section/TitleLineWithButto
 import { Formik, Form, Field } from 'formik';
 import { TabView, TabPanel } from 'primereact/tabview';
 import * as Yup from 'yup';
-import { getEmpleados, getPedidosProduccion, getLotes, getLotesStock, sendPedidosProduccion, sendPedidosProduccionDetalle, getPedidosProduccionDetalle } from './apiService/data/components/ApiService';
+import { getEmpleados, getPedidosProduccion, getLotes, getLotesStock, sendPedidosProduccion, sendPedidosProduccionDetalle, getPedidosProduccionDetalle, editPedidosProduccionDetalle } from './apiService/data/components/ApiService';
 import { PedidosProduccionViewModel } from '../interfaces/PedidoProduccionViewModel';
 import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProduccionDetalleViewModel';
 import { Toast } from 'primereact/toast';
@@ -43,6 +44,8 @@ const PedidosProduccionPage = () => {
     const [ppro_Id, setppro_Id] = useState(0);
     const [tableppd, settableppd ] = useState(false);
     const [labelButton, setLabelButton] = useState("Save")
+    const [saber, setSaber] = useState(1);
+    const [ppde_Id, setppde_Id] = useState(1);
     const items = [
         {
             label: 'Options',
@@ -96,7 +99,7 @@ const PedidosProduccionPage = () => {
         };
 
         const ppDetalle: PedidosProduccionDetalleViewModel = {
-            ppde_Id: 1,
+            ppde_Id: ppde_Id,
             ppro_Id:  ppro_Id, 
             lote_Id: DataDDL[0].lote_Id,
             lote_Stock: lote_Stock.toString(), 
@@ -133,55 +136,87 @@ const PedidosProduccionPage = () => {
     
             else if(ppde_Cantidad < DataDDL[0].lote_Stock) 
             {
+                if(saber ==  1)
+                {
+                        if(ppro_Id == 0)
+                        {
+                            try {
+                                const response = await sendPedidosProduccion(productData);
+                                console.log(response.data.data.messageStatus);
+                                ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
+                                setppro_Id(response.data.data.messageStatus)
+                                console.log("El id es: " +  ppDetalle.ppro_Id)
+                                console.log("Los datos de ppDetall es: ");
+                                console.log(ppDetalle);
+        
+                                const responses = await sendPedidosProduccionDetalle(ppDetalle);
+        
+                                fetchPedidosProduccionDetalles(response.data.data.messageStatus);
+                                settableppd(true);
 
-                if(ppro_Id == 0)
+                                if (response.status === 200 && responses.status === 200) {
+                                    setppde_Cantidad(0);
+                                    setSelectedLotes("0");
+                                    setlote_Stock('');
+                                    setlote_CodigoLote('')
+        
+                                  console.log('Success:', response.data);
+                                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+                                } else {
+                                  console.error('Error:', response.statusText);
+                                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                                }
+                              } catch (error) {
+                                console.error('Error:', error);
+                                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
+                              }
+                        }
+        
+                        else if(ppro_Id != 0)
+                        {
+                            try {
+                                console.log("Hola hola")
+                                console.log("El id de ppro es:")
+                                console.log(ppro_Id);
+                                ppDetalle.ppro_Id = ppro_Id;
+                                console.log(ppDetalle);
+                                const response = await sendPedidosProduccionDetalle(ppDetalle);
+                                fetchPedidosProduccionDetalles(ppro_Id);
+                                settableppd(true);
+                                if (response.status === 200) {
+                                    setppde_Cantidad(0);
+                                    setSelectedLotes("0");
+                                    setlote_Stock('');
+                                    setlote_CodigoLote('')
+                                  console.log('Success:', response.data);
+                                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+                                } else {
+                                  console.error('Error:', response.statusText);
+                                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                                }
+                              } catch (error) {
+                                console.error('Error:', error);
+                                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+                              }
+                        }   
+                }
+
+                 else if(saber ==  2)
                 {
                     try {
-                        const response = await sendPedidosProduccion(productData);
-                        console.log(response.data.data.messageStatus);
-                        ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
-                        setppro_Id(response.data.data.messageStatus)
-                        console.log("El id es: " +  ppDetalle.ppro_Id)
-                        console.log("Los datos de ppDetall es: ");
-                        console.log(ppDetalle);
-
-                        const responses = await sendPedidosProduccionDetalle(ppDetalle);
-
-                        fetchPedidosProduccionDetalles(response.data.data.messageStatus);
-
+                        ppDetalle.ppro_Id = ppro_Id;
+                        const response = await editPedidosProduccionDetalle(ppDetalle);
+                        setSaber(1);
+                        setLabelButton("Save")
+                        fetchPedidosProduccionDetalles(ppro_Id);
                         settableppd(true);
-                        if (response.status === 200 && responses.status === 200) {
+                        if (response.status === 200) {
                             setppde_Cantidad(0);
                             setSelectedLotes("0");
                             setlote_Stock('');
                             setlote_CodigoLote('')
-
                           console.log('Success:', response.data);
-                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
-                        } else {
-                          console.error('Error:', response.statusText);
-                          toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-                        }
-                      } catch (error) {
-                        console.error('Error:', error);
-                        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
-                      }
-                }
-
-                else if(ppro_Id != 0)
-                {
-                    try {
-                        console.log("Hola hola")
-                        console.log("El id de ppro es:")
-                        console.log(ppro_Id);
-                        ppDetalle.ppro_Id = ppro_Id;
-                        console.log(ppDetalle);
-                        const response = await sendPedidosProduccionDetalle(ppDetalle);
-                        fetchPedidosProduccionDetalles(ppro_Id);
-                        settableppd(true);
-                        if (response.status === 200) {
-                          console.log('Success:', response.data);
-                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
+                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Edit pedidos produccion successfully`, life: 3000 });
                         } else {
                           console.error('Error:', response.statusText);
                           toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -189,11 +224,17 @@ const PedidosProduccionPage = () => {
                       } catch (error) {
                         console.error('Error:', error);
                         toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
-                      }
+                      } 
                 }
             }
         }
       }
+
+    useEffect(() => {
+    }, [setSaber]);
+
+    useEffect(() => {
+    }, [setLabelButton]);
 
       useEffect(() => {
     }, [setppde_Cantidad]);
@@ -221,8 +262,16 @@ const PedidosProduccionPage = () => {
         setlote_CodigoLote(rowData.lote_CodigoLote);
         setppde_Cantidad(rowData.ppde_Cantidad);
         setppro_Id(rowData.ppro_Id)
+        setppde_Id(rowData.ppde_Id);
         setLabelButton("Edit");
+        setSaber(2)
     } 
+    
+    useEffect(() =>{
+    }, [setppde_Id]);
+
+    useEffect(() => {
+    }, [setSaber]);
 
     useEffect(() =>{
     }, [setLabelButton])
@@ -243,13 +292,44 @@ const PedidosProduccionPage = () => {
     }, [setppro_Id]);
 
     const togglePanel = () => {
+        setppde_Cantidad(0);
+        setSelectedLotes("0");
+        setlote_Stock('');
+        setlote_CodigoLote('')
+        setLabelButton('Save')
+        setSaber(1)
+        
         setppro_Id(0);
         setIsExpanded(!isExpanded);
         setIsExpandedDetails(!isExpandedDetails);
         setButtonExpanded(false);
-        setActiveIndex(0);  // Cambia al segundo TabPanel
         setTable(false);
+        setActiveIndex(0);  // Cambia al segundo TabPanel
     };
+
+    useEffect(() =>{
+    }, [setppde_Id]);
+
+    useEffect(() => {
+    }, [setSaber]);
+
+    useEffect(() =>{
+    }, [setLabelButton])
+
+    useEffect(() => {
+    }, [setppde_Cantidad]);
+
+    useEffect(() => {
+    }, [setSelectedLotes]);
+
+    useEffect(() => {
+    }, [setlote_Stock]);
+
+    useEffect(() => {
+    }, [setlote_CodigoLote]);
+
+    useEffect(() => {
+    }, [setppro_Id]);
 
     useEffect(() => {
     }, [setppro_Id]);
@@ -388,9 +468,32 @@ const PedidosProduccionPage = () => {
         fetchPedidosOrden();
       }, []);
 
-      const holamundo = (rowData) =>{
-            console.log(rowData);
+      const EditPPD = (rowData) => {
+        setppro_Id(rowData.ppro_Id);
+        setActiveIndex(1);
+        fetchPedidosProduccionDetalles(rowData.ppro_Id);
+        settableppd(true);
+        setIsExpanded(!isExpanded);
+        setIsExpandedDetails(!isExpandedDetails);
+        setButtonExpanded(false);
+        setTable(false);
       }
+
+      useEffect(() => {
+      }, [setppro_Id])
+
+      useEffect(() =>{
+    }, [setActiveIndex]);
+
+    useEffect(() => {
+    }, [setPedidosProduccionDetalle])
+
+    const Cancel = () => {
+        settableppd(false);
+        setIsExpandedDetails(false);
+        setButtonExpanded(true);
+        setTable(true);
+    }
 
     return (
         <>
@@ -413,14 +516,14 @@ const PedidosProduccionPage = () => {
                     paginator 
                     rows={10}
                     >
-                    <Column field="peor_Id" header="Id" sortable />
-                    <Column field="peor_Codigo" header="Codigo" sortable />
-                    <Column field="peor_Impuestos" header="Impuesto" sortable />
-                    <Column field="peor_DireccionExacta" header="Direccion" sortable />
+                    <Column field="ppro_Id" header="Id" sortable />
+                    <Column field="empl_NombreCompleto" header="Empleado" sortable />
+                    <Column field="ppro_Estados" header="Estado" sortable />
+                    <Column field="ppro_Observaciones" header="Observaciones" sortable />
                     <Column 
                     body={rowData => (
                     <div className='flex gap-3.5 justify-center'>
-                        <Button color="info" label="Editar" icon={mdiEye} onClick={() => holamundo(rowData)} small />
+                        <Button color="info" label="Editar" icon={mdiEye} onClick={() => EditPPD(rowData)} small />
                         <Button color="info" label="Detalles" icon={mdiEye} small />
                     </div>
                     )} />
@@ -575,6 +678,7 @@ const PedidosProduccionPage = () => {
                                     </Formik>
                                     <div className='botones'>
                                         <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />
+                                        <Button color="danger" label="Cancel" icon={mdiCancel} onClick={() => Cancel()} small />
                                     </div>
                                     <style jsx>{`
                                         .botones {
@@ -596,6 +700,7 @@ const PedidosProduccionPage = () => {
                     >
                     <Column field="ppde_Id" header="ID" sortable />
                     <Column field="mate_Descripcion" header="Material" sortable />
+                    <Column field="ppde_Cantidad" header="Cantidad" sortable />
                     <Column field="lote_Stock" header="Stock" sortable />
                     <Column field="colr_Nombre" header="Color" sortable />
                     <Column field="tipa_area" header="Area" sortable />

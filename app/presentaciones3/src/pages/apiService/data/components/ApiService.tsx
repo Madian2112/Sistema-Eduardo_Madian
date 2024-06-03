@@ -512,7 +512,7 @@ export const getPedidosProduccion = async () => {
     }
     
     const response = await axios.get(
-      API_URL + 'api/PedidosOrden/Listar',
+      API_URL + 'api/PedidosProduccion/Listar',
       {
         headers: {
           XApiKey: apiKey,
@@ -586,7 +586,7 @@ export const getPedidosProduccionDetalle = async (ppr_Id) => {
 export const sendPedidosProduccionDetalle = async (productData) => {
   try {
     const response = await axios.post(
-      'https://localhost:44380/api/PedidosProduccionDetalles/Insertar',
+      API_URL + 'api/PedidosProduccionDetalles/Insertar',
       productData,
       {
         headers: {
@@ -601,6 +601,26 @@ export const sendPedidosProduccionDetalle = async (productData) => {
     throw error;
   }
 };
+
+export const editPedidosProduccionDetalle = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PedidosProduccionDetalles/Editar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 //#endregion
 
 //#region LOTEEE
