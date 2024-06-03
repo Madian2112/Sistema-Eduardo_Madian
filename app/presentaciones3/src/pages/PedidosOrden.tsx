@@ -7,7 +7,7 @@ import {
   mdiPlus,
 } from '@mdi/js'
 
-
+import { DataScroller } from 'primereact/datascroller';
 import { Formik, Form, Field, } from 'formik';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,8 +40,9 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosEnvioViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
+import { ListBox } from 'primereact/listbox';
 
 
 
@@ -54,6 +55,7 @@ const [isExpandedCreate, setIsExpandedCreate] = useState(false);
 
 const handleModalCreate = () => {
   EditOrCreate("Create")
+  setEnviado(0);
   setIsExpanded(!isExpanded);
   Setpeor_Codigo("")
   Setprov_Id(null)
@@ -69,27 +71,11 @@ const handleModalCreate = () => {
 }
 
 const handleModalEdit = (EcoEnvio) => {
-  console.log(EcoEnvio)
   EditOrCreate("Edit")
   setIsExpanded(!isExpanded);
-  Setpeor_Codigo(EcoEnvio.peor_Codigo)
-  setSelectProveedor(EcoEnvio.prov_Id.toString())
-  console.log(EcoEnvio.prov_Id)
-  Setprov_Id(EcoEnvio.prov_Id.toString())
-  Setduca_No_Duca("Vacio")
-  Setpeor_Impuestos(0)
-  if (EcoEnvio.duca_No_Duca != null) {
-    Setduca_No_Duca(EcoEnvio.duca_No_Duca)
-  }
-  if (EcoEnvio.peor_Impuestos != 0) {
-    Setpeor_Impuestos(EcoEnvio.peor_Impuestos)
-  }
-  Setciud_Id(EcoEnvio.ciud_Id)
-  setSelectedPais(EcoEnvio.pais_Id)
-  setSelectedProvincia(EcoEnvio.pvin_Id)
-  Setpeor_DireccionExacta(EcoEnvio.peor_DireccionExacta)
-  Setpeor_FechaEntrada(EcoEnvio.peor_FechaEntrada)
-  Setpeor_Obsevaciones(EcoEnvio.peor_Obsevaciones)
+  setEnviado(1);
+
+
   setIsExpandedCreate(!isExpandedCreate);
 }
 
@@ -181,9 +167,9 @@ const generateMenuItems = (rowData) => {
         command: () => handleModalEdit(rowData)
       },
       {
-        label: 'Delete',
+        label: 'Finish',
         icon: 'pi pi-upload',
-        command: () => togglePanel(rowData)
+        command: () => setisModalFinishActive(true)
       }
     );
   }
@@ -344,10 +330,16 @@ const Send = async () => {
     }
   }else if(elect == "Edit") {
     try {
-      const response = await sendEditFormasEnvio(productData);
+      const response = await sendPedidosOrdenEdit(productData);
       if (response.status === 200) {
-        console.log('Success:', response.data);
-        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Update successfully`, life: 3000 });
+        if (response.data.message == "Operación completada exitosamente.") {
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
+          setActiveIndex(1);
+         
+        }else{
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Error`, life: 3000 });
+        }
+      
       } else {
         console.error('Error:', response.statusText);
         toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
@@ -369,9 +361,10 @@ const [IMG, setIMG] = useState("");
 
 const [Material, setMateriales] = useState([]);
 const [MaterialDesc, setMaterialDesc] = useState(null);
+const [mate_Descripcion, setmate_Descripcion] = useState("");
 const [MaterialDescCodigo, setMaterialDescCodigo] = useState(null);
 const [filteredCountries, setFilteredCountries] = useState(null);
-
+const [selectedCountry, setSelectedCountry] = useState(null);
 const [filteredCountriesCodigo, setfilteredCountriesCodigo] = useState(null);
 const fetchMaterial = async () => {
   try {
@@ -387,6 +380,29 @@ useEffect(() => {
   fetchMaterial()
 }, []);
 
+const itemTemplate = (data) => {
+  return (
+    <div className="col-12">
+      <div className="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+        <img
+          className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round"
+          src={data.mate_Imagen}
+          alt={data.name}
+        />
+        <div className="flex flex-column lg:flex-row justify-content-between align-items-center xl:align-items-start lg:flex-1 gap-4">
+          <div className="flex flex-column align-items-center lg:align-items-start gap-3">
+            <div className="flex flex-column gap-1">
+              <div className="text-2xl font-bold text-900">{data.mate_Descripcion}</div>
+            </div>
+          </div>
+          <div className="flex flex-row lg:flex-column align-items-center lg:align-items-end gap-4 lg:gap-2">
+            <Button icon="pi pi-shopping-cart" label="Add to Cart"  onClick={() =>{setmate_Descripcion(data.mate_Descripcion), console.log(data.mate_Descripcion)}}></Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 const search = (event) => {
   // Timeout to emulate a network connection
   setTimeout(() => {
@@ -468,33 +484,16 @@ const itemsDetalles = [
 //#endregion
 //Details Table
 const [isExpandedDetails, setIsExpandedDetails] = useState(false);
+const [proveedor, setproveedor] = useState("");
+const [ciudad, setciudad] = useState("");
+const [provincia, setprovincia] = useState("");
+const [pais, setpais] = useState("");
 const [FechaCreacion, setFechaCreacion] = useState("");
 const [FechaModificacion, setFechaFechaModificacion] = useState("");
 const [UsuarioCreacion, setUsuarioCreacion] = useState("");
 const [UsuarioModificacion, setUsuarioModificacion] = useState("");
 const togglePanel = (EcoEnvio) => {
-  console.log(EcoEnvio);
   setIsExpanded(!isExpanded);
-  Setpeor_Codigo(EcoEnvio.peor_Codigo)
-  Setprov_Id(EcoEnvio.prov_NombreCompania)
-  Setduca_No_Duca("Vacio")
-  Setpeor_Impuestos(0)
-  if (EcoEnvio.duca_No_Duca != null) {
-    Setduca_No_Duca(EcoEnvio.duca_No_Duca)
-  }
-  if (EcoEnvio.peor_Impuestos != 0) {
-    Setpeor_Impuestos(EcoEnvio.peor_Impuestos)
-  }
-  Setciud_Id(EcoEnvio.ciud_Nombre)
-  setSelectedPais(EcoEnvio.pais_Nombre)
-  setSelectedProvincia(EcoEnvio.pvin_Nombre)
-  Setpeor_DireccionExacta(EcoEnvio.peor_DireccionExacta)
-  Setpeor_FechaEntrada(EcoEnvio.peor_FechaEntrada)
-  Setpeor_Obsevaciones(EcoEnvio.peor_Obsevaciones)
-  setFechaCreacion(EcoEnvio.peor_FechaCreacion)
-  setFechaFechaModificacion(EcoEnvio.peor_FechaModificacion)
-  setUsuarioCreacion(EcoEnvio.usuarioCreacionNombre)
-  setUsuarioModificacion(EcoEnvio.usuarioModificacionNombre)
   setIsExpandedDetails(!isExpandedDetails);
 };
 
@@ -508,6 +507,34 @@ const togglePanelDetails = () => {
   Setpeor_Obsevaciones("")
   setIsExpandedDetails(!isExpandedDetails);
 };
+
+//#region FINISH
+const [isModalFinish, setisModalFinishActive] = useState(false);
+const Delete = async () => {
+  const productData: OrdenPedidosFinishViewModel = {
+    peor_Id:peor_Id
+  };
+  console.log(productData)
+
+    try {
+      const response = await sendDeletePedidosOrden(productData);
+      if (response.status === 200) {
+        console.log('Success:', response.data);
+        setisModalFinishActive(false);
+        GetOrdenPedidos(); 
+        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Delete successfully`, life: 3000 });
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+
+
+};
+//#endregion
 
   return (
     <>
@@ -539,7 +566,35 @@ const togglePanelDetails = () => {
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
             <Menu model={generateMenuItems(rowData)} popup ref={menuLeft} id="popup_menu_left" />
-            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{menuLeft.current.toggle(event); console.log(rowData)} }small aria-controls="popup_menu_left" aria-haspopup />
+            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{menuLeft.current.toggle(event);Setpeor_Codigo(rowData.peor_Codigo);  setproveedor(rowData.prov_NombreCompania); 
+            Setduca_No_Duca("Vacio");
+            Setpeor_Impuestos(0);
+            if (rowData.duca_No_Duca != null) {
+              Setduca_No_Duca(rowData.duca_No_Duca)
+            }
+            if (rowData.peor_Impuestos != 0) {
+              Setpeor_Impuestos(rowData.peor_Impuestos)
+            }
+            setciudad(rowData.ciud_Nombre)
+            setpais(rowData.pais_Nombre)
+            setprovincia(rowData.pvin_Nombre)
+            Setpeor_DireccionExacta(rowData.peor_DireccionExacta)
+            Setpeor_FechaEntrada(rowData.peor_FechaEntrada)
+            Setpeor_Obsevaciones(rowData.peor_Obsevaciones)
+            setFechaCreacion(rowData.peor_FechaCreacion)
+            setFechaFechaModificacion(rowData.peor_FechaModificacion)
+            setUsuarioCreacion(rowData.usuarioCreacionNombre)
+            setUsuarioModificacion(rowData.usuarioModificacionNombre)
+
+            //Editado
+            Setpeor_Id(rowData.peor_Id)
+            setSelectProveedor(rowData.prov_Id)
+            Setprov_Id(rowData.prov_Id)
+            Setciud_Id(rowData.ciud_Id)
+            setSelectedPais(rowData.pais_Id)
+            setSelectedProvincia(rowData.pvin_Id)
+  
+  } }small aria-controls="popup_menu_left" aria-haspopup />
           
            </div>
          )} />
@@ -548,7 +603,23 @@ const togglePanelDetails = () => {
    
     </SectionMain>
    )}
+  <CardBoxModal
+  title="Finish"
+  buttonColor="info"
+  buttonLabel="Add"
+  isActive={isModalFinish}
+  onConfirm={handleModalCreate}
+  onCancel={handleModalCreate}
+>
 
+<div className="text-center mb-4">
+        <p>Are you sure you want to finish?</p>
+      </div>
+      <div className="flex justify-center gap-4">
+        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
+        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalFinishActive(false)}>No</button>
+      </div>
+</CardBoxModal>
 
 {isExpandedCreate && (
       
@@ -614,6 +685,7 @@ const togglePanelDetails = () => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
           <Dropdown
+            name='prov_Id'
             value={selectProveedor}
             onChange={(e) => {
               setSelectProveedor(e.value);
@@ -779,7 +851,7 @@ const togglePanelDetails = () => {
           <div>
             <Formik
   initialValues={{
-    mate_Descripcion: '',
+    mate_Descripcion: mate_Descripcion,
     pedi_Id: peor_Codigo,
     mate_Id: prov_Id,
     prod_Cantidad: selectedPais,
@@ -795,51 +867,31 @@ const togglePanelDetails = () => {
     <Form className="w-full">
       <div className="flex justify-between mb-6">
         <div className="flex flex-col mr-4 flex-1">
-          <label htmlFor="name" className="mb-2">Material</label>
-          <AutoComplete 
-      value={MaterialDesc} 
-      suggestions={filteredCountries} 
-      completeMethod={search} 
-      onChange={(e) => {
-        setMaterialDesc(e.value); 
-        console.log(e.value)
-        setFieldValue('mate_Descripcion', e.value.mate_Descripcion); 
-        setIMG(e.value.mate_Imagen);
-        setMaterialDescCodigo(e.value.mate_Id)
-      }} 
-      field="mate_Descripcion"
-      inputStyle={{ border: 'none',width: '100%'}}
-
-      className={`border w-full ${touched.mate_Descripcion && errors.mate_Descripcion ? 'border-red-500' : 'border-gray-300'}`} 
-    />
-          {touched.mate_Descripcion && errors.mate_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.mate_Descripcion}</div>}
+        <div className="card">
+      <DataScroller
+        value={Material}
+        itemTemplate={itemTemplate}
+        rows={200}
+        buffer={0.4}
+        inline scrollHeight="300px"
+        header="List of Products"
+      />
+    </div>
+ 
+        
         </div>
         <div className="flex flex-col mr-4 flex-1">
-        <label htmlFor="name" className="mb-2">Code</label>
-          <AutoComplete 
-      value={MaterialDescCodigo} 
-      suggestions={filteredCountriesCodigo} 
-      completeMethod={searchCodigo} 
-      onChange={(e) => {
-        setMaterialDescCodigo(e.value); 
-        console.log(e.value)
-        setFieldValue('mate_Id', e.value.mate_Id); 
-        setIMG(e.value.mate_Imagen);
-        setMaterialDesc(e.value.mate_Descripcion)
-      }} 
-      field="mate_Id"
-      inputStyle={{ border: 'none',width: '100%'}}
-
-      className={`border w-full ${touched.mate_Id && errors.mate_Id ? 'border-red-500' : 'border-gray-300'}`} 
-    />
-          {touched.mate_Id && errors.mate_Id && <div className="text-red-500 text-xs mt-1">{errors.mate_Id}</div>}
-        </div>
-
-      </div>
-
-      <div className="flex justify-between mb-6">
-        <div className="flex flex-col mr-4 flex-1 justify-between">
-        <label htmlFor="name" className="mb-2">Amount</label>
+        <label htmlFor="name" className="mb-2">Material</label>
+        <Field
+            name="mate_Descripcion"
+            onChange={(e) => {
+              setFieldValue('mate_Descripcion', e.target.value);
+              setmate_Descripcion(e.target.value);
+            }}
+            className={`border p-2 ${touched.mate_Descripcion && errors.mate_Descripcion ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          {touched.mate_Descripcion && errors.mate_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.mate_Descripcion}</div>}
+          <label htmlFor="name" className="mb-2">Amount</label>
           <Field
             name="prod_Cantidad"
             onChange={(e) => {
@@ -860,12 +912,9 @@ const togglePanelDetails = () => {
           />
           {touched.prod_Precio && errors.prod_Precio && <div className="text-red-500 text-xs mt-1">{errors.prod_Precio.toString()}</div>}
         </div>
-        <div className="flex flex-col mr-4 flex-1">
-        <div className="flex justify-center items-center">
-  <img src={IMG} alt="" width="200px" />
-</div>
-        </div>
+
       </div>
+
       <div className="flex justify-end gap-4">
            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" >Send</button>
          </div>
@@ -887,7 +936,7 @@ const togglePanelDetails = () => {
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
             <Menu model={itemsDetalles} popup ref={menuLeftDetalles} id="popup_menu_left" />
-            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) => menuLeftDetalles.current.toggle(event)} small aria-controls="popup_menu_left" aria-haspopup />
+            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) => {menuLeftDetalles.current.toggle(event); }} small aria-controls="popup_menu_left" aria-haspopup />
           
            </div>
          )} />
@@ -929,7 +978,7 @@ const togglePanelDetails = () => {
     <tbody>
       <tr>
         <td className="border px-4 py-2">{peor_Codigo}</td>
-        <td className="border px-4 py-2">{prov_Id}</td>
+        <td className="border px-4 py-2">{proveedor}</td>
         <td className="border px-4 py-2">{duca_No_Duca}</td>
       </tr>
     </tbody>
@@ -944,9 +993,9 @@ const togglePanelDetails = () => {
     </thead>
     <tbody>
       <tr>
-        <td className="border px-4 py-2">{selectedPais}</td>
-        <td className="border px-4 py-2">{selectedProvincia}</td>
-        <td className="border px-4 py-2">{ciud_Id}</td>
+        <td className="border px-4 py-2">{pais}</td>
+        <td className="border px-4 py-2">{provincia}</td>
+        <td className="border px-4 py-2">{ciudad}</td>
       </tr>
     </tbody>
   </table>

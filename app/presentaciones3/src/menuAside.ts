@@ -52,6 +52,10 @@ const menuAside: MenuAsideItem[] = [
         href: '/formasEnvio',
         icon: mdiMonitor,
         label: 'Formas de envio',
+      },{
+        href: '/PedidosOrden',
+        icon: mdiMonitor,
+        label: 'Orden de pedidos',
       },
     ],
   },
