@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -401,17 +401,17 @@ const fetchMaterialDuca = async (Valor) => {
 
   }
 };
-
+const [ItemOMaterial, setItemOMaterial] = useState(0);
 
 const handleInputChange = async (e) => {
-console.log("ENTRO AQUI LOCOOO ES " + e)
+
   const count = await fetchMaterialDuca(e);
 
   if (count > 0) {
-    // Condición cuando fetchMaterialDuca retorna un valor mayor a 0
-    console.log('Materiales encontrados:', count);
+   
+    setItemOMaterial(1)
   } else {
-    // Condición cuando fetchMaterialDuca retorna 0
+    setItemOMaterial(0)
     fetchMaterial();
   }
 };
@@ -440,6 +440,12 @@ const itemTemplate = (data, setFieldValue) => {
               onClick={() => {
                 setFieldValue('mate_Descripcion', data.mate_Descripcion);
                 setFieldValue('mate_Id', data.mate_Id)
+                setFieldValue('item_Id', data.item_Id)
+                if (ItemOMaterial == 1) {
+                  setFieldValue('prod_Cantidad', data.prod_Cantidad)
+                  setFieldValue('prod_Precio', data.prod_Precio)
+                }
+
  }}
             >
               Add to Cart
@@ -459,6 +465,7 @@ const validationSchemaDetails = Yup.object().shape({
  const SendDetails = async (values) => {
   const productData: OrdenPedidosEnvioDetailsViewModel = {
     pedi_Id:peor_Id,
+    item_Id: values.item_Id,
     mate_Descripcion:values.mate_Descripcion,
     mate_Id: values.mate_Id,
     prod_Cantidad:values.prod_Cantidad,
@@ -469,6 +476,9 @@ const validationSchemaDetails = Yup.object().shape({
   console.log(productData)
 
     try {
+      if (ItemOMaterial == 0) {
+        
+      
       const response = await sendPedidosOrdenDetalles(productData);
       if (response.status === 200) {
         if (response.data.message == "Operación completada exitosamente.") {
@@ -482,6 +492,22 @@ const validationSchemaDetails = Yup.object().shape({
         console.error('Error:', response.statusText);
         toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
       }
+    }else{
+      const response = await sendItemPedidosOrdenDetalles(productData);
+      if (response.status === 200) {
+        if (response.data.message == "Operación completada exitosamente.") {
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
+          GetOrdenPedidosDetalles(peor_Id);
+        }else{
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Error`, life: 3000 });
+        }
+      
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    }
+
     } catch (error) {
       console.error('Error:', error);
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
@@ -516,21 +542,43 @@ useEffect(() => {
   GetOrdenPedidosDetalles(peor_Codigo);
 }, []); 
 const menuLeftDetalles = useRef(null);
-const itemsDetalles = [
-  {
+const ItemDetallesX = (ItemOMaterial) => {
+  const items = [
+    {
       label: 'Options',
       items: [
-          {
-              label: 'Add',
-              icon: 'pi pi-upload'
-          },
-          {
-            label: 'Delete',
-            icon: 'pi pi-upload'
+        {
+          label: 'Add',
+          icon: 'pi pi-upload'
         }
       ]
+    }
+  ];
+
+  if (ItemOMaterial == 0) {
+    items[0].items.push(
+      {
+        label: 'Edit',
+        icon: 'pi pi-refresh'
+      },
+      {
+        label: 'Finish',
+        icon: 'pi pi-upload'
+      }
+    );
+  } else if (ItemOMaterial == 1) {
+    items[0].items.push(
+      {
+        label: 'Delete',
+        icon: 'pi pi-times'
+      }
+    );
   }
-];
+
+  return items;
+};
+
+const itemsDetalles = ItemDetallesX(ItemOMaterial);
 //#endregion
 //Details Table
 const [isExpandedDetails, setIsExpandedDetails] = useState(false);
@@ -909,6 +957,7 @@ const Delete = async () => {
             <Formik
   initialValues={{
     mate_Descripcion: "",
+    item_Id: "",
     mate_Id: "",
     prod_Cantidad: "",
     prod_Precio: "",

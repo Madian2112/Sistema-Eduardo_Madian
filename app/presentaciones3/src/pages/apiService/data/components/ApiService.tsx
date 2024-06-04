@@ -748,6 +748,26 @@ export const sendPedidosOrdenDetalles = async (productData) => {
   }
 };
 
+
+export const sendItemPedidosOrdenDetalles = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PedidosOrdenDetalles/InsertarItems',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 export const sendPedidosOrdenEdit = async (productData) => {
   try {
     const response = await axios.post(
