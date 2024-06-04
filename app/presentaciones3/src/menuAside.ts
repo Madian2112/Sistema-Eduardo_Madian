@@ -11,9 +11,12 @@ import {
   mdiResponsive,
   mdiPalette,
   mdiVuejs,
-  mdiCity
+  mdiCity, 
+  mdiTrello, 
+  mdiTrendingUp
 } from '@mdi/js'
 import { MenuAsideItem } from './interfaces'
+
 
 const menuAside: MenuAsideItem[] = [
   {
@@ -49,6 +52,19 @@ const menuAside: MenuAsideItem[] = [
         href: '/formasEnvio',
         icon: mdiMonitor,
         label: 'Formas de envio',
+      },
+    ],
+  },
+
+  {
+    label: 'Importaciones',
+    icon: mdiTrendingUp,
+    menu: [
+      {
+        href: '/PedidosProduccion',
+        label: 'Pedidos de Produccion',
+        icon:  mdiTrello
+        ,
       },
     ],
   },

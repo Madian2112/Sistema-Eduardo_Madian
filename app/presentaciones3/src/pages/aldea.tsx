@@ -284,7 +284,6 @@ const AldeaPage = () => {
     onConfirm={handleModalAction}
     onCancel={handleModalAction}
   >
-           
     <Formik
       initialValues={{
         alde_Nombre: descripcion,
@@ -356,6 +355,7 @@ const AldeaPage = () => {
         </Form>
       )}
     </Formik>
+
   </CardBoxModal>
   
         <Head>
@@ -365,10 +365,6 @@ const AldeaPage = () => {
         <SectionMain>
           <SectionTitleLineWithButton icon={mdiCity} title="Aldea" main>
           </SectionTitleLineWithButton>
-  
-         
-  
-
     <Button color="info" label="Add" icon={mdiPlus} onClick={() => handleModalCreate() } small/>
 
       <DataTable 
