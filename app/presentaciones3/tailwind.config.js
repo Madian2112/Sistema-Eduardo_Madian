@@ -3,7 +3,11 @@
 const plugin = require('tailwindcss/plugin')
 
 module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './src/**/*.{js,jsx,ts,tsx}',
+    'node_modules/primereact/**/*.js',
+    'node_modules/primeicons/**/*.js'
+  ],
   darkMode: 'class', // or 'media' or 'class'
   theme: {
     asideScrollbars: {
