@@ -9,7 +9,6 @@ export interface OrdenPedidosEnvioViewModel {
     peor_Impuestos: number;
     usua_UsuarioCreacion:number;
     peor_Obsevaciones: string,
-
     peor_FechaCreacion: string;
     usua_UsuarioModificacion:number;
     peor_FechaModificacion: string;
@@ -19,4 +18,33 @@ export interface OrdenPedidosEnvioViewModel {
   export interface OrdenPedidosFinishViewModel {
     peor_Id: number;
   }
+
+  export interface OrdenPedidosDeleteItemViewModel {
+    prod_Id: number;
+    item_Id:number;
+  }
   
+
+
+  export interface OrdenPedidosEnvioDetailsViewModel {
+    pedi_Id: number;
+    item_Id: number;
+    mate_Id: Number;
+    mate_Descripcion: string;
+    prod_Cantidad: number;
+    prod_Precio: string;
+    usua_UsuarioCreacion: number;
+    prod_FechaCreacion: string;
+  }
+
+
+
+  export interface MaterialesViewModel {
+    item_Id: number;
+    mate_Id: Number;
+    mate_Descripcion: string;
+    prod_Cantidad: number;
+    prod_Precio: string;
+    mate_Imagan: Number;
+  }
+
