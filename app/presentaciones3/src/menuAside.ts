@@ -52,10 +52,6 @@ const menuAside: MenuAsideItem[] = [
         href: '/formasEnvio',
         icon: mdiMonitor,
         label: 'Formas de envio',
-      },{
-        href: '/PedidosOrden',
-        icon: mdiMonitor,
-        label: 'Orden de pedidos',
       },
     ],
   },
@@ -64,6 +60,11 @@ const menuAside: MenuAsideItem[] = [
     label: 'Importaciones',
     icon: mdiTrendingUp,
     menu: [
+      {
+        href: '/PedidosOrden',
+        icon: mdiMonitor,
+        label: 'Orden de pedidos',
+      },
       {
         href: '/PedidosProduccion',
         label: 'Pedidos de Produccion',

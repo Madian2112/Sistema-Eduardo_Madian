@@ -177,7 +177,7 @@ const generateMenuItems = (rowData) => {
   const baseItems = [
     {
       label: 'Details',
-      icon: 'pi pi-upload',
+      icon: 'pi pi-book',
       command: () => togglePanel(rowData)
     }
   ];
@@ -186,12 +186,12 @@ const generateMenuItems = (rowData) => {
     baseItems.push(
       {
         label: 'Edit',
-        icon: 'pi pi-refresh',
+        icon: 'pi pi-user-edit',
         command: () => handleModalEdit(rowData)
       },
       {
         label: 'Finish',
-        icon: 'pi pi-upload',
+        icon: 'pi pi-send',
         command: () => setisModalFinishActive(true)
       }
     );
@@ -641,7 +641,7 @@ const ItemDetallesX = (ItemOMaterial) => {
       items: [
         {
           label: 'Add',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-plus',
           command: () => setisModalAddDetails(true)
         }
       ]
@@ -649,13 +649,6 @@ const ItemDetallesX = (ItemOMaterial) => {
   ];
 
   if (ItemOMaterial == 0) {
-    items[0].items.push(
-      {
-        label: 'Edit',
-        icon: 'pi pi-refresh',
-        command: () => console.log('Edit clicked')
-      }
-    );
   } else if (ItemOMaterial == 1) {
     items[0].items.push(
       {
@@ -1220,7 +1213,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => handleModalCreateLeave()}
+              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos(); setActiveIndex(0);}}
             >
               Leave
             </button>
@@ -1309,7 +1302,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => handleModalCreateLeave()}
+              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos();setActiveIndex(0);}}
             >
               Leave
             </button>
@@ -1410,7 +1403,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => setisModalAddDetails(false)}
+              onClick={() => {setisModalAddDetails(false); }}
             >
               Leave
             </button>

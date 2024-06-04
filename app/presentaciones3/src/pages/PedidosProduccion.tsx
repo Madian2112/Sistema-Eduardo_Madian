@@ -611,6 +611,7 @@ const PedidosProduccionPage = () => {
     // }, [setSelectedEmpleados])
 
     const Cancel = () => {
+        fetchPedidosOrden();
         setIsDetails(false);
         settableppd(false);
         setIsExpandedDetails(false);
@@ -769,7 +770,7 @@ const PedidosProduccionPage = () => {
             {isExpandedDetails && (
                 <div className="" style={{ marginLeft: '2.0em', marginRight: '2.0em' }}>
                 <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-                <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header I</div>} disabled={activeIndex == 1}>
+                <TabPanel leftIcon={mdiCheck} header={<div style={{ textAlign: 'center', width: '100%' }}>Pedidos Produccion</div>} disabled={activeIndex == 1}>
                             <Card className="md:w-25rem">
                                 <SectionMain>
                                     <Formik
@@ -862,7 +863,7 @@ const PedidosProduccionPage = () => {
                                 </SectionMain>
                             </Card>
                         </TabPanel>
-                        <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Header II</div>} disabled={activeIndex == 0}>
+                        <TabPanel header={<div style={{ textAlign: 'center', width: '100%' }}>Pedidos Produccion Detalles</div>} disabled={activeIndex == 0}>
                             <Card className="md:w-25rem">
                                 <SectionMain>
                                     <Formik
