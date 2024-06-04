@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -366,11 +366,53 @@ const [filteredCountriesCodigo, setfilteredCountriesCodigo] = useState(null);
 const fetchMaterial = async () => {
   try {
     const data = await getMaterial();
-    setMateriales(data);
-
+    const mappedData = data.map(item => ({
+      item_Id: item.mate_Id,
+      mate_Id: item.mate_Id,
+      mate_Descripcion: item.mate_Descripcion,
+      prod_Cantidad: item.prod_Cantidad,
+      prod_Precio: item.prod_Precio,
+      mate_Imagen: item.mate_Imagen
+    }));
+    setMateriales(mappedData);
   } catch (error) {
     toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch materials', life: 3000 });
 
+  }
+};
+
+const fetchMaterialDuca = async (Valor) => {
+  try {
+    const data = await getMaterialItems(Valor);
+    const mappedData = data.map(item => ({
+      item_Id: item.item_Id,
+      mate_Id: item.item_Id,
+      mate_Descripcion: item.item_IdentificacionComercialMercancias,
+      prod_Cantidad: item.item_Cantidad,
+      prod_Precio: item.item_ValorUnitario,
+      mate_Imagen: item.mate_Imagen
+    }));
+    setMateriales(mappedData);
+    return mappedData.length;
+
+  } catch (error) {
+    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch materials', life: 3000 });
+    return (0)
+
+  }
+};
+
+
+const handleInputChange = async (e) => {
+console.log("ENTRO AQUI LOCOOO ES " + e)
+  const count = await fetchMaterialDuca(e);
+
+  if (count > 0) {
+    // Condición cuando fetchMaterialDuca retorna un valor mayor a 0
+    console.log('Materiales encontrados:', count);
+  } else {
+    // Condición cuando fetchMaterialDuca retorna 0
+    fetchMaterial();
   }
 };
 useEffect(() => {
@@ -479,11 +521,7 @@ const itemsDetalles = [
       label: 'Options',
       items: [
           {
-              label: 'Edit',
-              icon: 'pi pi-refresh'
-          },
-          {
-              label: 'Details',
+              label: 'Add',
               icon: 'pi pi-upload'
           },
           {
@@ -605,6 +643,7 @@ const Delete = async () => {
             Setciud_Id(rowData.ciud_Id)
             setSelectedPais(rowData.pais_Id)
             setSelectedProvincia(rowData.pvin_Id)
+            GetOrdenPedidosDetalles(rowData.peor_Id)
   
   } }small aria-controls="popup_menu_left" aria-haspopup />
           
@@ -719,6 +758,12 @@ const Delete = async () => {
             onChange={(e) => {
               setFieldValue('duca_No_Duca', e.target.value);
               Setduca_No_Duca(e.target.value);
+              const count = fetchMaterialDuca(e.target.value);
+
+              handleInputChange(e.target.value)
+
+
+
             }}
             className={`border p-2 ${touched.duca_No_Duca && errors.duca_No_Duca ? 'border-red-500' : 'border-gray-300'}`}
           />

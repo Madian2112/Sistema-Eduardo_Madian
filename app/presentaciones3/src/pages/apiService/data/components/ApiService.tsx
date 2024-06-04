@@ -644,6 +644,39 @@ export const getMaterial = async () => {
     return [];
   }
 };
+
+
+export const getMaterialItems = async (id) => {
+  console.log("EL VALOR ES" + id)
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI AL MATERIAL XD");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.post(
+      API_URL + 'api/Items/ItemsOrdenPedido?id=' + id, // Enviar el id como query parameter
+      {},
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
 //#endregion
 //#region  Pedidos Orden
 //Lista
@@ -658,7 +691,8 @@ export const getPedidosOrdenDetalles = async (valor) => {
     }
     
     const response = await axios.get(
-      `${API_URL}/api/PedidosOrdenDetalles/Listar?pedi_Id=${valor}`,
+      
+      `${API_URL}api/PedidosOrdenDetalles/Listar?pedi_Id=${valor}`,
       {
         headers: {
           'XApiKey': apiKey,
