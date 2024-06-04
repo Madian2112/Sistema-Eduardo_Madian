@@ -729,6 +729,25 @@ export const sendPedidosOrden = async (productData) => {
   }
 };
 
+export const sendPedidosOrdenSubItems = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PODetallePorPedidoOrdenDetalle/Insertar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 export const sendPedidosOrdenDetalles = async (productData) => {
   try {
     const response = await axios.post(
@@ -854,4 +873,65 @@ export const sendDeleteItemPedidosOrden = async (productData) => {
   }
 };
 
+//#endregion
+//#region CompraDetalle
+export const getCompraDetalle = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/OrdenCompra/Listar',
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
+
+export const getCompraDetalleFiltrado = async (valor) => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/OrdenCompraDetalles/DibujarDetalles?orco_Codigo=' + valor,
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
 //#endregion

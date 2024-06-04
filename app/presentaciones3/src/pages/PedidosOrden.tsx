@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,7 +40,7 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosDeleteItemViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosDeleteItemViewModel, OrdenPedidosDetailsSendViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
 import { ListBox } from 'primereact/listbox';
 import { Row } from 'primereact/row';
@@ -76,6 +76,17 @@ setSelectedProvincia("0")
   Setpeor_FechaEntrada("")
   Setpeor_Obsevaciones("")
   setIsExpandedCreate(!isExpandedCreate);
+}
+
+const handleModalCreateLeave = () => {
+
+  setIsExpanded(!isExpanded);
+
+  setIsExpandedCreate(!isExpandedCreate);
+}
+
+const handleModalCreateLeaveModal = () => {
+ setisModalAddDetails(false)
 }
 
 const handleModalEdit = (EcoEnvio) => {
@@ -342,6 +353,8 @@ const validationSchema = Yup.object().shape({
   peor_FechaEntrada: Yup.string().required('Entry date is requerid'),
   peor_Obsevaciones: Yup.string().required('Observations is requerid'),
  });
+
+
 //#endregion
 //#region CREATE
 const Send = async () => {
@@ -625,7 +638,7 @@ const ItemDetallesX = (ItemOMaterial) => {
         {
           label: 'Add',
           icon: 'pi pi-upload',
-          command: () => console.log('Add clicked')
+          command: () => setisModalAddDetails(true)
         }
       ]
     }
@@ -742,7 +755,104 @@ const DeleteItem = async () => {
 
 };   
 
+//#region ADD DETAILS
+const [isModalAddDetails, setisModalAddDetails] = useState(false);
+const [CompraDetalle, setCompraDetalle] = useState([]);
+const [CompraDetalleFiltrado, setCompraDetalleFiltrado] = useState([]);
+const [SelectCompraDetalle, setSelectCompraDetalle] = useState(null);
+const validationSchemaAdd = Yup.object().shape({
+  code_Id: Yup.string().required('Requerid'),
+  orco_Id: Yup.string().required('Requerid'),
 
+ });
+
+ //DROPDOWNS
+ const AxioCompraDetalle = async () => {
+
+  try {
+
+        const data = await getCompraDetalle();
+        setCompraDetalle(data);
+
+  
+  } catch (error) {
+    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
+
+  }
+};
+
+useEffect(() => {
+  AxioCompraDetalle()
+}, []);
+
+
+const AxioFiltradoCompra = async (valor) => {
+
+  try {
+
+        const data = await getCompraDetalleFiltrado(valor);
+        setCompraDetalleFiltrado(data);
+
+  
+  } catch (error) {
+    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
+
+  }
+};
+const [filteredCode, setfilteredCode] = useState(null);
+const search = (event) => {
+  // Timeout to emulate a network connection
+  setTimeout(() => {
+      let _filteredCountries;
+
+      if (!event.query.trim().length) {
+          _filteredCountries = [...CompraDetalle];
+      }
+      else {
+          _filteredCountries = CompraDetalle.filter((country) => {
+              return country.orco_Codigo.toLowerCase().startsWith(event.query.toLowerCase());
+          });
+      }
+
+      setfilteredCode(_filteredCountries);
+  }, 250);
+}
+
+const SendSubDetails = async (values) => {
+  const productData: OrdenPedidosDetailsSendViewModel = {
+    prod_Id:prod_Id,
+    code_Id:values.code_Id,
+    orco_Id:values.orco_Id,
+    usua_UsuarioCreacion: 1,
+    ocpo_FechaCreacion:new Date().toISOString(),
+  };
+
+
+    try {
+      const response = await sendPedidosOrdenSubItems(productData);
+      if (response.status === 200) {
+        if (response.data.message == "Operación completada exitosamente.") {
+          setisModalAddDetails(false)
+          GetOrdenPedidosDetalles(peor_Id);
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
+
+        }else{
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Error`, life: 3000 });
+        }
+      
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+ 
+  
+ 
+}
+//#endregion
 
 // Inicializar el estado con el valor por defecto
 
@@ -815,6 +925,7 @@ const DeleteItem = async () => {
             setSelectDefaultPaisId(rowData.pais_Id)
             setDefaulProvinciaId(rowData.pvin_Id)
             setdefaultCiudadId(rowData.ciud_Id)
+            Setprov_Id(rowData.prov_Id)
 
 
       
@@ -929,7 +1040,7 @@ const DeleteItem = async () => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
           <select
-                name="prov_Id"
+         
                 value={selectProveedor}
                 className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
                 style={{ height: '42px', paddingTop: '0px' }}
@@ -1093,13 +1204,14 @@ const DeleteItem = async () => {
             />
             {touched.peor_Obsevaciones && errors.peor_Obsevaciones && <div className="text-red-500 text-xs mt-1">{errors.peor_Obsevaciones}</div>}
           </div>
-          <div className="flex flex-row flex-grow-2 gap-2 align-items-center">
+          <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
             <button
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
+              onClick={() => handleModalCreateLeave()}
             >
-              Cancel
+              Leave
             </button>
             <button
               type="submit"
@@ -1178,13 +1290,14 @@ const DeleteItem = async () => {
 
       </div>
 
-      <div className="flex flex-row flex-grow-2 gap-2 align-items-center">
+      <div className="flex flex-row flex-grow-2 gap-2 align-items-center justify-end">
             <button
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
+              onClick={() => handleModalCreateLeave()}
             >
-              Cancel
+              Leave
             </button>
             <button
               type="submit"
@@ -1226,7 +1339,81 @@ const DeleteItem = async () => {
         )}
       </div>
     </div>
+  <CardBoxModal
+  title="Add"
+  buttonColor="info"
+  buttonLabel="Add"
+  isActive={isModalAddDetails}
+  onConfirm={handleModalCreateLeaveModal}
+  onCancel={handleModalCreate}
+>
 
+<div className="text-center mb-4">
+<Formik
+  initialValues={{
+
+    code_Id: "",
+    orco_Id: "",
+  }}
+  validationSchema={validationSchemaAdd}
+  onSubmit={(values, { setSubmitting }) => {
+    setSubmitting(false);
+    SendSubDetails(values);
+  }}
+>
+  {({ errors, touched, setFieldValue }) => (
+    <Form className="w-full">
+      <div className="flex justify-between mb-6">
+        <div className="flex flex-col mr-4 flex-1">
+        <label htmlFor="name" className="mb-2">Orden Compra</label>
+        <div className="card flex justify-content-center">
+            <AutoComplete field="orco_Codigo" value={SelectCompraDetalle} suggestions={filteredCode} completeMethod={search} onChange={(e) =>{ setSelectCompraDetalle(e.value), setFieldValue('orco_Id', e.value.orco_Id);; AxioFiltradoCompra(e.value.orco_Codigo)}} />
+        </div>
+      
+          {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
+        </div>
+        <div className="flex flex-col mr-4 flex-1">
+        <label htmlFor="name" className="mb-2">Orden Compra</label>
+          <Dropdown
+            value={SelectCompraDetalle}
+            onChange={(e) => {
+
+              setFieldValue('code_Id', e.value.code_Id);
+              setSelectCompraDetalle(e.value)
+            }}
+            options={CompraDetalleFiltrado}
+            optionLabel="esti_Descripcion"
+            placeholder="Select a option"
+            className={`border p-2 ${touched.code_Id && errors.code_Id ? 'border-red-500' : 'border-gray-300'}`}
+            style={{ height: '42px', paddingTop: '0px' }}
+          />
+          {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
+        </div>
+    
+      </div>
+      <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
+            <button
+              type="button"
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              style={{ height: '44px' }}
+              onClick={() => setisModalAddDetails(false)}
+            >
+              Leave
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              style={{ height: '44px' }}
+            >
+              Add
+            </button>
+          </div>
+    </Form>
+  )}
+</Formik>
+      </div>
+     
+</CardBoxModal>
 
    
      
