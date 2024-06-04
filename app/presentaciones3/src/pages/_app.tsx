@@ -3,14 +3,15 @@ import Script from 'next/script'
 import type { AppProps } from 'next/app'
 import type { ReactElement, ReactNode } from 'react'
 import type { NextPage } from 'next'
-import 'primereact/resources/themes/saga-blue/theme.css'; 
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
+
 import Head from 'next/head'
 import { store } from '../stores/store'
 import { Provider } from 'react-redux'
 import '../css/main.css'
 import '../css/tablas.css'
+import 'primereact/resources/themes/saga-blue/theme.css'; 
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 export type NextPageWithLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
