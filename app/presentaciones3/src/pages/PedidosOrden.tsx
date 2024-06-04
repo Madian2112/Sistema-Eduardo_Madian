@@ -65,10 +65,11 @@ const handleModalCreate = () => {
   Setpeor_Impuestos(0)
   Setciud_Id("")
   setpais_id("")
-setSelectedPais("0")
+
 setSelectProveedor("0")
 setSelectedProvincia("0")
   setSelectDefaultProveedor("0")
+  setSelectedPais("0")
   setSelectDefaultPaisId("0")
   setDefaulProvinciaId("0")
   setSelectedProvincia(null)
@@ -249,11 +250,11 @@ const fetchPaises = async () => {
   try {
     const data = await getPaises();
     setPaises(data);
-    const defaultPais = data.find(prov => prov.pais_Id === parseInt(defaultPaisId));
+
     if (parseInt(defaultPaisId) != 0) {
       setpais_id("1")
     }
-    setSelectedPais(defaultPais);
+
     setLoadingDrop(false);
   } catch (error) {
     toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
@@ -350,7 +351,7 @@ const validationSchema = Yup.object().shape({
   pais_Id: Yup.string().required('Country is requerid'),
   ciud_Id: Yup.string().required('City is requerid'),
   peor_DireccionExacta: Yup.string().required('Exact address is requerid'),
-  peor_FechaEntrada: Yup.string().required('Entry date is requerid'),
+  peor_FechaEntrada: Yup.date().required('Entry date is requerid'),
   peor_Obsevaciones: Yup.string().required('Observations is requerid'),
  });
 
@@ -532,8 +533,8 @@ const itemTemplate = (data, setFieldValue) => {
 
 const validationSchemaDetails = Yup.object().shape({
   mate_Descripcion: Yup.string().required('Material is requerid'),
-  prod_Cantidad: Yup.string().required('Amount is requerid'),
-  prod_Precio:Yup.string().required('Price is requerid'),
+  prod_Cantidad: Yup.number().required('Amount is requerid').typeError('Should be a number'),
+  prod_Precio:Yup.number().required('Price is requerid').typeError('Should be a number'),
  });
 
  const SendDetails = async (values) => {
@@ -924,10 +925,14 @@ const SendSubDetails = async (values) => {
             }
 
             setDefaulProvinciaId(rowData.prov_Id)
+            setSelectedPais(rowData.pais_Id)
             setSelectDefaultPaisId(rowData.pais_Id)
             setDefaulProvinciaId(rowData.pvin_Id)
             setdefaultCiudadId(rowData.ciud_Id)
             Setprov_Id(rowData.prov_Id)
+
+            console.log(rowData.pais_Nombre)
+            
 
 
       
@@ -1267,12 +1272,14 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1 justify-between">
         <label htmlFor="name" className="mb-2">Material</label>
         <Field
+            disabled={true}
             name="mate_Descripcion"
             className={`border p-2 ${touched.mate_Descripcion && errors.mate_Descripcion ? 'border-red-500' : 'border-gray-300'}`}
           />
           {touched.mate_Descripcion && errors.mate_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.mate_Descripcion}</div>}
           <label htmlFor="name" className="mb-2">Amount</label>
           <Field
+           disabled={Active}
             name="prod_Cantidad"
             onChange={(e) => {
               setFieldValue('prod_Cantidad', e.target.value);
@@ -1282,6 +1289,7 @@ const SendSubDetails = async (values) => {
           {touched.prod_Cantidad && errors.prod_Cantidad && <div className="text-red-500 text-xs mt-1">{errors.prod_Cantidad.toString()}</div>}
           <label htmlFor="name" className="mb-2">Price</label>
           <Field
+            disabled={Active}
             name="prod_Precio"
             onChange={(e) => {
               setFieldValue('prod_Precio', e.target.value);
@@ -1368,15 +1376,15 @@ const SendSubDetails = async (values) => {
     <Form className="w-full">
       <div className="flex justify-between mb-6">
         <div className="flex flex-col mr-4 flex-1">
-        <label htmlFor="name" className="mb-2">Orden Compra</label>
+        <label htmlFor="name" className="mb-2 w-full text-left">Orden Compra</label>
         <div className="card flex justify-content-center">
-            <AutoComplete field="orco_Codigo" value={SelectCompraDetalle} suggestions={filteredCode} completeMethod={search} onChange={(e) =>{ setSelectCompraDetalle(e.value), setFieldValue('orco_Id', e.value.orco_Id);; AxioFiltradoCompra(e.value.orco_Codigo)}} />
+            <AutoComplete field="orco_Codigo" value={SelectCompraDetalle}    className={`border w-46 ${touched.orco_Id && errors.orco_Id ? 'border-red-500' : 'border-gray-300'}`} suggestions={filteredCode} completeMethod={search} inputStyle={{ border: 'none' }} onChange={(e) =>{ setSelectCompraDetalle(e.value), setFieldValue('orco_Id', e.value.orco_Id);; AxioFiltradoCompra(e.value.orco_Codigo)}} />
         </div>
       
           {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
         </div>
         <div className="flex flex-col mr-4 flex-1">
-        <label htmlFor="name" className="mb-2">Orden Compra</label>
+        <label htmlFor="name" className="mb-2 mr-28">Detalle</label>
           <Dropdown
             value={SelectCompraDetalle}
             onChange={(e) => {
@@ -1387,14 +1395,14 @@ const SendSubDetails = async (values) => {
             options={CompraDetalleFiltrado}
             optionLabel="esti_Descripcion"
             placeholder="Select a option"
-            className={`border p-2 ${touched.code_Id && errors.code_Id ? 'border-red-500' : 'border-gray-300'}`}
+            className={`border p-2 w-46 ${touched.code_Id && errors.code_Id ? 'border-red-500' : 'border-gray-300'}`}
             style={{ height: '42px', paddingTop: '0px' }}
           />
           {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
         </div>
     
       </div>
-      <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
+      <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6 justify-end">
             <button
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
