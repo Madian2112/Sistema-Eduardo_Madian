@@ -14,10 +14,10 @@ export interface PedidosProduccionDetalleViewModel {
     ppro_Estados: string;
     usua_UsuarioCreacion: number;
     usuarioCreacionNombre: string;
-    ppde_FechaCreacion: String;
+    ppde_FechaCreacion: string;
     usua_UsuarioModificacion: number;
     usuarioModificacionNombre: string;
-    ppde_FechaModificacion: String;
+    ppde_FechaModificacion: string;
     ppde_Estado: boolean;
   }
   

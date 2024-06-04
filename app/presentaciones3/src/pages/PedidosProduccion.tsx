@@ -4,7 +4,6 @@ import {
     mdiClose,
     mdiCheck, 
     mdiEye,
-    mdiDotsVertical, 
     mdiCancel
 /*    mdiConsoleNetworkOutline*/
 } from '@mdi/js'
@@ -26,7 +25,6 @@ import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProducci
 import { Toast } from 'primereact/toast';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Menu } from 'primereact/menu';
 
 const PedidosProduccionPage = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -39,30 +37,24 @@ const PedidosProduccionPage = () => {
     const [ppro_Fecha, setppro_Fecha] = useState('');
     const [ppr_Observaciones, setppr_Observaciones] = useState('');
     const [lote_Stock, setlote_Stock] = useState('');
-    const [ppde_Cantidad, setppde_Cantidad] = useState(0)
+    const [ppde_Cantidad, setppde_Cantidad] = useState('')
     const [DataDDL, setDataDDL] = useState([]);
     const [ppro_Id, setppro_Id] = useState(0);
     const [tableppd, settableppd ] = useState(false);
     const [labelButton, setLabelButton] = useState("Save")
     const [saber, setSaber] = useState(1);
     const [ppde_Id, setppde_Id] = useState(1);
-    const items = [
-        {
-            label: 'Options',
-            items: [
-                {
-                    label: 'Refresh',
-                    icon: 'pi pi-refresh'
-                },
-                {
-                    label: 'Export',
-                    icon: 'pi pi-upload'
-                }
-            ]
-        }
-    ];
-    const menuLeft = useRef(null);
-
+    const [CantidadValor, setCantidadValor] = useState('');
+    const [CodigoLoteValor, setCodigoLoteValor] = useState('');
+    const [isDetails, setIsDetails] = useState(false);
+    const [Empleados, setEmpleadoss] = useState('');
+    const [Observaciones, setObservaciones] = useState('');
+    const [FechaCreacion, setFechaCreacion] = useState('');
+    const [UsuarioCreacion, setUsuarioCreacion] = useState('');
+    const [FechaModificacion, setFechaModificacion] = useState('');
+    const [UsuarioModificacion, setUsuarioModificacion] = useState('');
+    const [ID, setID] = useState('');
+    const [LabelDetails, setLabelDetails] = useState('Pedidos Produccion');
 
     const validationSchema = Yup.object().shape({
         ppro_Fecha: Yup.string().required('Date is required'),
@@ -86,8 +78,8 @@ const PedidosProduccionPage = () => {
             ppro_Observaciones: ppr_Observaciones.toString(),
             ppro_Finalizado: false,
             usua_UsuarioCreacion:1,
-            lote_Id: parseInt(DataDDL[0].lote_Id),
-            ppde_Cantidad: ppde_Cantidad,
+            lote_Id: DataDDL[0].lote_Id,
+            ppde_Cantidad: parseInt(ppde_Cantidad),
             UsuarioCreacionNombre: "",
             ppro_FechaCreacion: new Date().toISOString(),
             usua_UsuarioModificacion: 1,
@@ -104,7 +96,7 @@ const PedidosProduccionPage = () => {
             lote_Id: DataDDL[0].lote_Id,
             lote_Stock: lote_Stock.toString(), 
             lote_CodigoLote: "hola",
-            ppde_Cantidad: ppde_Cantidad,
+            ppde_Cantidad: parseInt(ppde_Cantidad),
             mate_Id: 1,
             mate_Descripcion: "hola", 
             colr_Codigo: "hola", 
@@ -123,18 +115,18 @@ const PedidosProduccionPage = () => {
 
         console.log(productData)
 
-        if(ppde_Cantidad == 0 || selectedLotes == '' || selectedLotes == "0" || lote_CodigoLote == '' || lote_Stock == '' )
+        if(ppde_Cantidad == '' || selectedLotes == '' || selectedLotes == "0" || lote_CodigoLote == '' || lote_Stock == '' )
         {
             toast.current.show({ severity: 'error', summary: 'Error', detail: `No se aceptan campos vacios`, life: 3000 });   
         }
 
-        else if(ppde_Cantidad != 0 && selectedLotes != '' && selectedLotes != "0" && lote_CodigoLote != '' && lote_Stock != '' )
+        else if(ppde_Cantidad != '' && selectedLotes != '' && selectedLotes != "0" && lote_CodigoLote != '' && lote_Stock != '' )
         {
             if(ppde_Cantidad > DataDDL[0].lote_Stock){
                 toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
             }
     
-            else if(ppde_Cantidad < DataDDL[0].lote_Stock) 
+            else if(ppde_Cantidad <= DataDDL[0].lote_Stock) 
             {
                 if(saber ==  1)
                 {
@@ -155,7 +147,7 @@ const PedidosProduccionPage = () => {
                                 settableppd(true);
 
                                 if (response.status === 200 && responses.status === 200) {
-                                    setppde_Cantidad(0);
+                                    setppde_Cantidad('');
                                     setSelectedLotes("0");
                                     setlote_Stock('');
                                     setlote_CodigoLote('')
@@ -184,7 +176,7 @@ const PedidosProduccionPage = () => {
                                 fetchPedidosProduccionDetalles(ppro_Id);
                                 settableppd(true);
                                 if (response.status === 200) {
-                                    setppde_Cantidad(0);
+                                    setppde_Cantidad('');
                                     setSelectedLotes("0");
                                     setlote_Stock('');
                                     setlote_CodigoLote('')
@@ -205,13 +197,17 @@ const PedidosProduccionPage = () => {
                 {
                     try {
                         ppDetalle.ppro_Id = ppro_Id;
+                        if(lote_CodigoLote == CodigoLoteValor) 
+                        {
+                            ppDetalle.ppde_Cantidad = parseInt(ppde_Cantidad) + parseInt(CantidadValor);
+                        }
                         const response = await editPedidosProduccionDetalle(ppDetalle);
                         setSaber(1);
                         setLabelButton("Save")
                         fetchPedidosProduccionDetalles(ppro_Id);
                         settableppd(true);
                         if (response.status === 200) {
-                            setppde_Cantidad(0);
+                            setppde_Cantidad('');
                             setSelectedLotes("0");
                             setlote_Stock('');
                             setlote_CodigoLote('')
@@ -256,7 +252,14 @@ const PedidosProduccionPage = () => {
 
       //#endregion
 
-    const EditTable = (rowData) => {
+    const EditTable = async (rowData) => {
+        console.log("El codigo de lote es: " + rowData.lote_CodigoLote)
+        const data = await getLotesStock(rowData.lote_CodigoLote);
+        setDataDDL(data);
+        console.log("La data del segundo ddl es: ");
+        console.log(data);
+        setCantidadValor(rowData.ppde_Cantidad)
+        setCodigoLoteValor(rowData.lote_CodigoLote)
         setSelectedLotes(rowData.lote_CodigoLote);
         setlote_Stock(rowData.lote_Stock);
         setlote_CodigoLote(rowData.lote_CodigoLote);
@@ -266,6 +269,15 @@ const PedidosProduccionPage = () => {
         setLabelButton("Edit");
         setSaber(2)
     } 
+
+    useEffect(() =>{
+    }, [setDataDDL]);
+
+    useEffect(() =>{
+    }, [setCantidadValor]);
+
+    useEffect(() =>{
+    }, [setCodigoLoteValor]);
     
     useEffect(() =>{
     }, [setppde_Id]);
@@ -292,10 +304,15 @@ const PedidosProduccionPage = () => {
     }, [setppro_Id]);
 
     const togglePanel = () => {
-        setppde_Cantidad(0);
+        setppde_Cantidad('');
         setSelectedLotes("0");
         setlote_Stock('');
         setlote_CodigoLote('')
+
+        setppro_Fecha('');
+        setppr_Observaciones('')
+        setSelectedEmpleados("0")
+
         setLabelButton('Save')
         setSaber(1)
         
@@ -327,6 +344,17 @@ const PedidosProduccionPage = () => {
 
     useEffect(() => {
     }, [setlote_CodigoLote]);
+
+
+    useEffect(() =>{
+    }, [setppro_Fecha]);
+
+    useEffect(() => {
+    }, [setppr_Observaciones]);
+
+    useEffect(() =>{
+    }, [setSelectedEmpleados])
+
 
     useEffect(() => {
     }, [setppro_Id]);
@@ -395,21 +423,60 @@ const PedidosProduccionPage = () => {
         fetchLotes();
       }, []);
 
+      const FieldLote = async (event) => {
+        try
+        {
+            const lotesid = event.target.value;
+            /*setFieldValue('pais_Id', event.target.value);*/
+            const data = await getLotesStock(lotesid);
+    
+            setDataDDL(data);
+            setlote_CodigoLote(data[0].lote_CodigoLote)
+            setlote_CodigoLote(data[0].lote_CodigoLote)
+            setlote_Stock(data[0].lote_Stock)
+            setSelectedLotes(lotesid);
+        }
+
+        catch (error)
+        {
+            console.log("El error es:" + error); 
+        }
+      }
+
+      useEffect(() => {
+    }, [setDataDDL])
+      //#endregion
+
+      useEffect(() => {
+     }, [setlote_Stock])
+
+     useEffect(() => {
+    }, [setlote_CodigoLote])
+
       const handleChanges = async (event) => {
-        const lotesid = event.target.value;
-        /*setFieldValue('pais_Id', event.target.value);*/
-        const data = await getLotesStock(lotesid);
-        setDataDDL(data);
-        console.log("La data es: " + data.data);
-        console.log("Hola Madian");
-        console.log(data);
-        console.log("El stock es:")
-        console.log(data[0].lote_Stock);
-        console.log("El codigo de lote es:")
-        setlote_CodigoLote(data[0].lote_CodigoLote)
-        setlote_CodigoLote(data[0].lote_CodigoLote)
-        setlote_Stock(data[0].lote_Stock)
-        setSelectedLotes(lotesid);
+        try
+        {
+            const lotesid = event.target.value;
+            /*setFieldValue('pais_Id', event.target.value);*/
+            const data = await getLotesStock(lotesid);
+    
+            setDataDDL(data);
+            console.log("La data es: " + data.data);
+            console.log("Hola Madian");
+            console.log(data);
+            console.log("El stock es:")
+            console.log(data[0].lote_Stock);
+            console.log("El codigo de lote es:")
+            setlote_CodigoLote(data[0].lote_CodigoLote)
+            setlote_CodigoLote(data[0].lote_CodigoLote)
+            setlote_Stock(data[0].lote_Stock)
+            setSelectedLotes(lotesid);
+        }
+
+        catch
+        {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Select a valid lot', life: 3000 });
+        }
       };
 
       /*useEffect(() => {
@@ -468,8 +535,12 @@ const PedidosProduccionPage = () => {
         fetchPedidosOrden();
       }, []);
 
-      const EditPPD = (rowData) => {
+      const EditPPD = async (rowData) => {
         setppro_Id(rowData.ppro_Id);
+        const data = await getLotesStock(parseInt(rowData.ppro_Id));
+        setDataDDL(data);
+        console.log("La data del ddl es: ");
+        console.log(data);
         setActiveIndex(1);
         fetchPedidosProduccionDetalles(rowData.ppro_Id);
         settableppd(true);
@@ -477,7 +548,20 @@ const PedidosProduccionPage = () => {
         setIsExpandedDetails(!isExpandedDetails);
         setButtonExpanded(false);
         setTable(false);
+
+        setppde_Cantidad('');
+        setSelectedLotes("0");
+        setlote_Stock('');
+        setlote_CodigoLote('')
+
+        setppro_Fecha('');
+        setppr_Observaciones('')
+        setSelectedEmpleados("0")
+
       }
+
+      useEffect(() => {
+     }, [setDataDDL])
 
       useEffect(() => {
       }, [setppro_Id])
@@ -488,12 +572,73 @@ const PedidosProduccionPage = () => {
     useEffect(() => {
     }, [setPedidosProduccionDetalle])
 
+    useEffect(() => {
+    }, [setppde_Cantidad]);
+
+    useEffect(() => {
+    }, [setSelectedLotes]);
+
+    useEffect(() => {
+    }, [setlote_Stock]);
+
+    useEffect(() => {
+    }, [setlote_CodigoLote]);
+
+    useEffect(() =>{
+    }, [setppro_Fecha]);
+
+    useEffect(() => {
+    }, [setppr_Observaciones]);
+
+    useEffect(() =>{
+    }, [setSelectedEmpleados])
+
     const Cancel = () => {
+        setIsDetails(false);
         settableppd(false);
         setIsExpandedDetails(false);
         setButtonExpanded(true);
         setTable(true);
+        setLabelDetails('Pedidos Produccion')
     }
+
+    const Details = (rowData) =>{
+        setLabelDetails('Pedidos Produccion Details')
+        setIsDetails(true);
+        setID(rowData.ppro_Id)
+        setEmpleadoss(rowData.empl_NombreCompleto);
+        setObservaciones(rowData.ppro_Observaciones);
+        setFechaCreacion(rowData.ppro_FechaCreacion);
+        setUsuarioCreacion(rowData.usuarioCreacionNombre);
+        setFechaModificacion(rowData.ppro_FechaModificacion);
+        setUsuarioModificacion(rowData.usuarioModificacionNombre);
+        setButtonExpanded(false);
+        setTable(false);
+    }
+
+    useEffect(() => {
+    }, [setLabelDetails])
+
+    useEffect(() => {
+    }, [setID])
+
+    useEffect(() => {
+    }, [setEmpleadoss])
+
+     useEffect(() => {
+     }, [setObservaciones])
+
+     useEffect(() =>{
+   }, [setFechaCreacion]);
+
+   useEffect(() => {
+   }, [setUsuarioCreacion])
+
+    useEffect(() =>{
+    }, [setFechaModificacion]);
+
+    useEffect(() => {
+    }, [setUsuarioModificacion])
 
     return (
         <>
@@ -502,7 +647,7 @@ const PedidosProduccionPage = () => {
                 <title>{getPageTitle('Pedidos Produccion')}</title>
             </Head>
             <SectionMain>
-                <SectionTitleLineWithButton icon={mdiTrendingNeutral} title="Pedidos de Produccion" main>
+                <SectionTitleLineWithButton icon={mdiTrendingNeutral} title={LabelDetails} main>
                 </SectionTitleLineWithButton>
                 {buttonExpanded && (
                     <Button color="info" label="Add" icon={mdiPlus} onClick={() => togglePanel()} />
@@ -524,12 +669,63 @@ const PedidosProduccionPage = () => {
                     body={rowData => (
                     <div className='flex gap-3.5 justify-center'>
                         <Button color="info" label="Editar" icon={mdiEye} onClick={() => EditPPD(rowData)} small />
-                        <Button color="info" label="Detalles" icon={mdiEye} small />
+                        <Button color="info" label="Detalles" icon={mdiEye} onClick={() => Details(rowData)} small />
                     </div>
                     )} />
                     </DataTable>
                     )}
             </SectionMain>
+
+            {isDetails && (
+            <Card className="md:w-25rem" style={{ marginTop: '-15px' }}>
+            <SectionMain>
+            <div className="p-4">
+                <table className="w-full ">
+                <thead>
+                    <tr>
+                    <th className="px-4 py-2 ">Id</th>
+                    <th className="px-4 py-2 ">Empleado</th>
+                    <th className=" px-4 py-2 ">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td style={{ backgroundColor: 'white' }} className=" px-4 py-2 ">{ID}</td>
+                    <td style={{ backgroundColor: 'white' }} className=" px-4 py-2 ">{Empleados}</td>
+                    <td style={{ backgroundColor: 'white' }} className=" px-4 py-2 " >{Observaciones}</td>
+                    </tr>
+                </tbody>
+                </table>
+
+
+                <h2 className='font-extrabold ml-1 mt-1 mb-1'>Auditoria</h2>
+                <table className="w-full border-collapse">
+                <thead>
+                    <tr>
+                    <th className="border px-4 py-2">Action</th>
+                    <th className="border px-4 py-2">User</th>
+                    <th className="border px-4 py-2">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td className="border px-4 py-2">Create</td>
+                    <td className="border px-4 py-2">{UsuarioCreacion}</td>
+                    <td className="border px-4 py-2">{FechaCreacion}</td>
+                    </tr>
+                    <tr>
+                    <td className="border px-4 py-2">Edit</td>
+                    <td className="border px-4 py-2">{UsuarioModificacion}</td>
+                    <td className="border px-4 py-2">{FechaModificacion}</td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+
+            <Button color="danger" label="Regresar" icon={mdiCancel} onClick={() => Cancel()} small />
+            </SectionMain>
+            </Card>
+            )}
 
             {isExpandedDetails && (
                 <div className="" style={{ marginLeft: '2.0em', marginRight: '2.0em' }}>
@@ -634,6 +830,7 @@ const PedidosProduccionPage = () => {
                                                             name="lote_CodigoLote"
                                                             onChange={(e) => {
                                                                 setlote_CodigoLote(e.target.value);
+                                                                FieldLote(e);
                                                             }}
                                                             className={`border p-2  border-gray-300`}
                                                         />
@@ -677,9 +874,8 @@ const PedidosProduccionPage = () => {
                                         )}
                                     </Formik>
                                     <div className='botones'>
-                                        <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />
                                         <Button color="danger" label="Cancel" icon={mdiCancel} onClick={() => Cancel()} small />
-                                    </div>
+                                        <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />                                    </div>
                                     <style jsx>{`
                                         .botones {
                                             display: flex;
@@ -690,15 +886,16 @@ const PedidosProduccionPage = () => {
                                 </SectionMain>
                             </Card>
                             {tableppd &&(
+                    <Card className="md:w-25rem" style={{ marginTop: '20px' }}>
                     <DataTable 
                     value={PedidosProduccionDetalle} 
                     loading={loading} 
                     responsiveLayout="scroll"
                     paginator 
                     rows={10}
-                    style={{ marginTop: '20px' }}
                     >
                     <Column field="ppde_Id" header="ID" sortable />
+                    <Column field="colr_Codigo" header="Codigo" sortable />
                     <Column field="mate_Descripcion" header="Material" sortable />
                     <Column field="ppde_Cantidad" header="Cantidad" sortable />
                     <Column field="lote_Stock" header="Stock" sortable />
@@ -711,6 +908,7 @@ const PedidosProduccionPage = () => {
                     </div>
                     )} />
                     </DataTable>
+                    </Card>
                             )}
                         </TabPanel>
                         #endregion
