@@ -632,6 +632,25 @@ export const sendPedidosProduccionDetalle = async (productData) => {
   }
 };
 
+export const sendPedidosProduccionDetalleEliminar = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PedidosOrdenDetalles/Eliminar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 export const editPedidosProduccionDetalle = async (productData) => {
   try {
     const response = await axios.post(

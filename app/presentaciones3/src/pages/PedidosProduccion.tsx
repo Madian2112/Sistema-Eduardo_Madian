@@ -4,7 +4,9 @@ import {
     mdiClose,
     mdiCheck, 
     mdiEye,
-    mdiCancel
+    mdiCancel, 
+    mdiDetails, 
+    mdiAppleKeyboardControl
 /*    mdiConsoleNetworkOutline*/
 } from '@mdi/js'
 import LayoutAuthenticated from '../layouts/Authenticated'
@@ -25,6 +27,7 @@ import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProducci
 import { Toast } from 'primereact/toast';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Menu } from 'primereact/menu';
 
 const PedidosProduccionPage = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -55,6 +58,7 @@ const PedidosProduccionPage = () => {
     const [UsuarioModificacion, setUsuarioModificacion] = useState('');
     const [ID, setID] = useState('');
     const [LabelDetails, setLabelDetails] = useState('Pedidos Produccion');
+    const [Row, setRow] = useState('');
 
     const validationSchema = Yup.object().shape({
         ppro_Fecha: Yup.string().required('Date is required'),
@@ -119,117 +123,126 @@ const PedidosProduccionPage = () => {
 
         if(ppde_Cantidad == '' || selectedLotes == '' || selectedLotes == "0" || lote_CodigoLote == '' || lote_Stock == '' )
         {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `No se aceptan campos vacios`, life: 3000 });   
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Empty fields are not accepted`, life: 3000 });   
         }
 
         else if(ppde_Cantidad != '' && selectedLotes != '' && selectedLotes != "0" && lote_CodigoLote != '' && lote_Stock != '' )
         {
-            if(ppde_Cantidad > DataDDL[0].lote_Stock){
-                toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
-            }
-    
-            else if(ppde_Cantidad <= DataDDL[0].lote_Stock) 
+            if(DataDDL[0].lote_Stock == 0)
             {
-                if(saber ==  1)
-                {
-                        if(ppro_Id == 0)
-                        {
-                            try {
-                                const response = await sendPedidosProduccion(productData);
-                                console.log(response.data.data.messageStatus);
-                                ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
-                                setppro_Id(response.data.data.messageStatus)
-                                console.log("El id es: " +  ppDetalle.ppro_Id)
-                                console.log("Los datos de ppDetall es: ");
-                                console.log(ppDetalle);
-        
-                                const responses = await sendPedidosProduccionDetalle(ppDetalle);
-        
-                                fetchPedidosProduccionDetalles(response.data.data.messageStatus);
-                                settableppd(true);
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'The lot is out of stock', life: 3000 });
+            }
 
-                                if (response.status === 200 && responses.status === 200) {
-                                    setppde_Cantidad('');
-                                    setSelectedLotes("0");
-                                    setlote_Stock('');
-                                    setlote_CodigoLote('')
-        
-                                  console.log('Success:', response.data);
-                                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
-                                } else {
-                                  console.error('Error:', response.statusText);
-                                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-                                }
-                              } catch (error) {
-                                console.error('Error:', error);
-                                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
-                              }
-                        }
-        
-                        else if(ppro_Id != 0)
-                        {
-                            try {
-                                console.log("Hola hola")
-                                console.log("El id de ppro es:")
-                                console.log(ppro_Id);
-                                ppDetalle.ppro_Id = ppro_Id;
-                                console.log(ppDetalle);
-                                const response = await sendPedidosProduccionDetalle(ppDetalle);
-                                fetchPedidosProduccionDetalles(ppro_Id);
-                                settableppd(true);
-                                if (response.status === 200) {
-                                    setppde_Cantidad('');
-                                    setSelectedLotes("0");
-                                    setlote_Stock('');
-                                    setlote_CodigoLote('')
-                                  console.log('Success:', response.data);
-                                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Formas envio added successfully`, life: 3000 });
-                                } else {
-                                  console.error('Error:', response.statusText);
-                                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-                                }
-                              } catch (error) {
-                                console.error('Error:', error);
-                                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
-                              }
-                        }   
+            else
+            {
+                if(ppde_Cantidad > DataDDL[0].lote_Stock){
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: `The quantity must be less than or equal to the stock`, life: 3000 });
                 }
-
-                 else if(saber ==  2)
+        
+                else if(ppde_Cantidad <= DataDDL[0].lote_Stock) 
                 {
-                    try {
-                        ppDetalle.ppro_Id = ppro_Id;
-                        if(lote_CodigoLote == CodigoLoteValor) 
-                        {
-                            ppDetalle.ppde_Cantidad = parseInt(ppde_Cantidad) + parseInt(CantidadValor);
-                        }
-                        const response = await editPedidosProduccionDetalle(ppDetalle);
-                        setSaber(1);
-                        setLabelButton("Save")
-                        fetchPedidosProduccionDetalles(ppro_Id);
-                        settableppd(true);
-                        if (response.status === 200) {
-                            setppde_Cantidad('');
-                            setSelectedLotes("0");
-                            setlote_Stock('');
-                            setlote_CodigoLote('')
-                          console.log('Success:', response.data);
-                          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Edit pedidos produccion successfully`, life: 3000 });
-                        } else {
-                          console.error('Error:', response.statusText);
-                          toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
-                        }
-                      } catch (error) {
-                        console.error('Error:', error);
-                        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
-                      } 
+                    if(saber ==  1)
+                    {
+                            if(ppro_Id == 0)
+                            {
+                                try {
+                                    const response = await sendPedidosProduccion(productData);
+                                    console.log(response.data.data.messageStatus);
+                                    ppDetalle.ppro_Id = parseInt(response.data.data.messageStatus);
+                                    setppro_Id(response.data.data.messageStatus)
+                                    console.log("El id es: " +  ppDetalle.ppro_Id)
+                                    console.log("Los datos de ppDetall es: ");
+                                    console.log(ppDetalle);
+            
+                                    const responses = await sendPedidosProduccionDetalle(ppDetalle);
+            
+                                    fetchPedidosProduccionDetalles(response.data.data.messageStatus);
+                                    settableppd(true);
+    
+                                    if (response.status === 200 && responses.status === 200) {
+                                        setppde_Cantidad('');
+                                        setSelectedLotes("0");
+                                        setlote_Stock('');
+                                        setlote_CodigoLote('')
+            
+                                      console.log('Success:', response.data);
+                                      toast.current?.show({ severity: 'success', summary: 'Success', detail: `Orders Production Detail & Production Orders Added Successfullys envio added successfully`, life: 3000 });
+                                    } else {
+                                      console.error('Error:', response.statusText);
+                                      toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                                    }
+                                  } catch (error) {
+                                    console.error('Error:', error);
+                                    toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
+                                  }
+                            }
+            
+                            else if(ppro_Id != 0)
+                            {
+                                try {
+                                    console.log("Hola hola")
+                                    console.log("El id de ppro es:")
+                                    console.log(ppro_Id);
+                                    ppDetalle.ppro_Id = ppro_Id;
+                                    console.log(ppDetalle);
+                                    const response = await sendPedidosProduccionDetalle(ppDetalle);
+                                    fetchPedidosProduccionDetalles(ppro_Id);
+                                    settableppd(true);
+                                    if (response.status === 200) {
+                                        setppde_Cantidad('');
+                                        setSelectedLotes("0");
+                                        setlote_Stock('');
+                                        setlote_CodigoLote('')
+                                      console.log('Success:', response.data);
+                                      toast.current?.show({ severity: 'success', summary: 'Success', detail: `Orders Production Detail Added Successfully`, life: 3000 });
+                                    } else {
+                                      console.error('Error:', response.statusText);
+                                      toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                                    }
+                                  } catch (error) {
+                                    console.error('Error:', error);
+                                    toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+                                  }
+                            }   
+                    }
+    
+                     else if(saber ==  2)
+                    {
+                        try {
+                            ppDetalle.ppro_Id = ppro_Id;
+                            if(lote_CodigoLote == CodigoLoteValor) 
+                            {
+                                ppDetalle.ppde_Cantidad = parseInt(ppde_Cantidad) + parseInt(CantidadValor);
+                            }
+                            const response = await editPedidosProduccionDetalle(ppDetalle);
+                            setSaber(1);
+                            setLabelButton("Save")
+                            fetchPedidosProduccionDetalles(ppro_Id);
+                            settableppd(true);
+                            if (response.status === 200) {
+                                setppde_Cantidad('');
+                                setSelectedLotes("0");
+                                setlote_Stock('');
+                                setlote_CodigoLote('')
+                              console.log('Success:', response.data);
+                              toast.current?.show({ severity: 'success', summary: 'Success', detail: `Orders Production Detail Edited Successfully`, life: 3000 });
+                            } else {
+                              console.error('Error:', response.statusText);
+                              toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                            }
+                          } catch (error) {
+                            console.error('Error:', error);
+                            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+                          } 
+                    }
                 }
             }
         }
         }
         catch
         {
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Seleccine un lote', life: 3000 });
+            console.log("Entro aqui")
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Select a Batch', life: 3000 });
         }
       }
 
@@ -259,20 +272,26 @@ const PedidosProduccionPage = () => {
 
       //#endregion
 
-    const EditTable = async (rowData) => {
-        console.log("El codigo de lote es: " + rowData.lote_CodigoLote)
-        const data = await getLotesStock(rowData.lote_CodigoLote);
+      useEffect(() => {
+    }, [setRow]);
+
+    const EditTable = async () => {
+        console.log("La data del Row es: ");
+        console.log("El lote codigo es: " + Row.lote_CodigoLote);
+        setDataDDL(Row.lote_CodigoLote);
+        console.log(Row)
+        setCantidadValor(Row.ppde_Cantidad)
+        setCodigoLoteValor(Row.lote_CodigoLote)
+        setSelectedLotes(Row.lote_CodigoLote);
+        setlote_Stock(Row.lote_Stock);
+        setlote_CodigoLote(Row.lote_CodigoLote);1
+        setppde_Cantidad(Row.ppde_Cantidad);
+        setppro_Id(Row.ppro_Id)
+        setppde_Id(Row.ppde_Id);
+        const data = await getLotesStock(Row.lote_CodigoLote);
         setDataDDL(data);
         console.log("La data del segundo ddl es: ");
         console.log(data);
-        setCantidadValor(rowData.ppde_Cantidad)
-        setCodigoLoteValor(rowData.lote_CodigoLote)
-        setSelectedLotes(rowData.lote_CodigoLote);
-        setlote_Stock(rowData.lote_Stock);
-        setlote_CodigoLote(rowData.lote_CodigoLote);
-        setppde_Cantidad(rowData.ppde_Cantidad);
-        setppro_Id(rowData.ppro_Id)
-        setppde_Id(rowData.ppde_Id);
         setLabelButton("Edit");
         setSaber(2)
     } 
@@ -543,13 +562,7 @@ const PedidosProduccionPage = () => {
       }, []);
 
       const EditPPD = async (rowData) => {
-        setppro_Id(rowData.ppro_Id);
-        const data = await getLotesStock(parseInt(rowData.ppro_Id));
-        setDataDDL(data);
-        console.log("La data del ddl es: ");
-        console.log(data);
         setActiveIndex(1);
-        fetchPedidosProduccionDetalles(rowData.ppro_Id);
         settableppd(true);
         setIsExpanded(!isExpanded);
         setIsExpandedDetails(!isExpandedDetails);
@@ -567,38 +580,35 @@ const PedidosProduccionPage = () => {
 
       }
 
-      useEffect(() => {
-     }, [setDataDDL])
+    //   useEffect(() => {
+    //  }, [setDataDDL])
 
-      useEffect(() => {
-      }, [setppro_Id])
+    //   useEffect(() =>{
+    // }, [setActiveIndex]);
 
-      useEffect(() =>{
-    }, [setActiveIndex]);
+    // useEffect(() => {
+    // }, [setPedidosProduccionDetalle])
 
-    useEffect(() => {
-    }, [setPedidosProduccionDetalle])
+    // useEffect(() => {
+    // }, [setppde_Cantidad]);
 
-    useEffect(() => {
-    }, [setppde_Cantidad]);
+    // useEffect(() => {
+    // }, [setSelectedLotes]);
 
-    useEffect(() => {
-    }, [setSelectedLotes]);
+    // useEffect(() => {
+    // }, [setlote_Stock]);
 
-    useEffect(() => {
-    }, [setlote_Stock]);
+    // useEffect(() => {
+    // }, [setlote_CodigoLote]);
 
-    useEffect(() => {
-    }, [setlote_CodigoLote]);
+    // useEffect(() =>{
+    // }, [setppro_Fecha]);
 
-    useEffect(() =>{
-    }, [setppro_Fecha]);
+    // useEffect(() => {
+    // }, [setppr_Observaciones]);
 
-    useEffect(() => {
-    }, [setppr_Observaciones]);
-
-    useEffect(() =>{
-    }, [setSelectedEmpleados])
+    // useEffect(() =>{
+    // }, [setSelectedEmpleados])
 
     const Cancel = () => {
         setIsDetails(false);
@@ -612,40 +622,46 @@ const PedidosProduccionPage = () => {
     const Details = (rowData) =>{
         setLabelDetails('Pedidos Produccion Details')
         setIsDetails(true);
-        setID(rowData.ppro_Id)
-        setEmpleadoss(rowData.empl_NombreCompleto);
-        setObservaciones(rowData.ppro_Observaciones);
-        setFechaCreacion(rowData.ppro_FechaCreacion);
-        setUsuarioCreacion(rowData.usuarioCreacionNombre);
-        setFechaModificacion(rowData.ppro_FechaModificacion);
-        setUsuarioModificacion(rowData.usuarioModificacionNombre);
         setButtonExpanded(false);
         setTable(false);
     }
 
-    useEffect(() => {
-    }, [setLabelDetails])
+    const menuLeft = useRef(null); 
+    const generateMenuItems = (rowData) => {
+      
+        const baseItems = [
+          {
+            label: 'Edit',
+            icon: 'pi pi-upload',
+            command: () => EditPPD(rowData)
+          },
+          {
+            label: 'Details',
+            icon: 'pi pi-upload',
+            command: () => Details(rowData)
+          }
+        ];
+        
+        return baseItems;
 
-    useEffect(() => {
-    }, [setID])
+      };
 
-    useEffect(() => {
-    }, [setEmpleadoss])
+      const generateMenuItemsPPD = (rowData) => {
+      
+        const baseItems = [
+          {
+            label: 'Edit',
+            icon: 'pi pi-upload',
+            command: () => EditTable()
+          }
+        ];
+        
+        return baseItems;
 
-     useEffect(() => {
-     }, [setObservaciones])
+      };
 
-     useEffect(() =>{
-   }, [setFechaCreacion]);
-
-   useEffect(() => {
-   }, [setUsuarioCreacion])
-
-    useEffect(() =>{
-    }, [setFechaModificacion]);
-
-    useEffect(() => {
-    }, [setUsuarioModificacion])
+      useEffect(() => {
+    }, [setRow]);
 
     return (
         <>
@@ -674,10 +690,26 @@ const PedidosProduccionPage = () => {
                     <Column field="ppro_Observaciones" header="Observaciones" sortable />
                     <Column 
                     body={rowData => (
-                    <div className='flex gap-3.5 justify-center'>
-                        <Button color="info" label="Editar" icon={mdiEye} onClick={() => EditPPD(rowData)} small />
-                        <Button color="info" label="Detalles" icon={mdiEye} onClick={() => Details(rowData)} small />
-                    </div>
+                        <div className='flex gap-3.5 justify-center'>
+                        <Menu model={generateMenuItems(rowData)} popup ref={menuLeft} id="popup_menu_left" />
+                        <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setppro_Id(rowData.ppro_Id);  menuLeft.current.toggle(event);
+                          fetchPedidosProduccionDetalles(rowData.ppro_Id);
+
+                          setID(rowData.ppro_Id)
+                          setEmpleadoss(rowData.empl_NombreCompleto);
+                          setObservaciones(rowData.ppro_Observaciones);
+                          setFechaCreacion(rowData.ppro_FechaCreacion);
+                          setUsuarioCreacion(rowData.usuarioCreacionNombre);
+                          setFechaModificacion(rowData.ppro_FechaModificacion);
+                          setUsuarioModificacion(rowData.usuarioModificacionNombre);
+              
+              } }small aria-controls="popup_menu_left" aria-haspopup />
+                      
+                       </div>
+                    // <div className='flex gap-3.5 justify-center'>
+                    //     <Button color="info" label="Editar" icon={mdiEye} onClick={() => EditPPD(rowData)} small />
+                    //     <Button color="info" label="Detalles" icon={mdiEye} onClick={() => Details(rowData)} small />
+                    // </div>
                     )} />
                     </DataTable>
                     )}
@@ -686,7 +718,7 @@ const PedidosProduccionPage = () => {
             {isDetails && (
             <Card className="md:w-25rem" style={{ marginTop: '-15px' }}>
             <SectionMain>
-            <div className="p-4">
+            <div className="p-4" style={{ marginTop: '-30px' }}>
                 <table className="w-full ">
                 <thead>
                     <tr>
@@ -729,7 +761,7 @@ const PedidosProduccionPage = () => {
                 </table>
             </div>
 
-            <Button color="danger" label="Regresar" icon={mdiCancel} onClick={() => Cancel()} small />
+            <Button color="info" label="Cancel" icon={mdiAppleKeyboardControl} onClick={() => Cancel() } small/>
             </SectionMain>
             </Card>
             )}
@@ -798,10 +830,28 @@ const PedidosProduccionPage = () => {
                                             </Form>
                                         )}
                                     </Formik>
-                                    <div className='botones'>
+                                    <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
+                                        <button
+                                        type="button"
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                        style={{ height: '44px' }}
+                                        onClick={() => togglePanelDetails()}
+                                        >
+                                        Leave
+                                        </button>
+                                        <button
+                                        type="submit"
+                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                        style={{ height: '44px' }}
+                                        onClick={goToNextTab}
+                                        >
+                                        Add
+                                        </button>
+                                    </div>
+                                    {/* <div className='botones'>
                                         <Button color="danger" label="Cancel" icon={mdiClose} onClick={() => togglePanelDetails()} small />
                                         <Button color="success" label="Next " icon={mdiCheck} onClick={goToNextTab} small />
-                                    </div>
+                                    </div>  */}
                                     <style jsx>{`
                                         .botones {
                                             display: flex;
@@ -880,16 +930,35 @@ const PedidosProduccionPage = () => {
                                             </Form>
                                         )}
                                     </Formik>
-                                    <div className='botones'>
+                                    <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
+                                        <button
+                                        type="button"
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                        style={{ height: '44px' }}
+                                        onClick={() => Cancel()}
+                                        >
+                                        Leave
+                                        </button>
+                                        <button
+                                        type="submit"
+                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                        style={{ height: '44px' }}
+                                        onClick={Send}
+                                        >
+                                        Add
+                                        </button>
+                                    </div>
+                                    {/* <div className='botones'>
                                         <Button color="danger" label="Cancel" icon={mdiCancel} onClick={() => Cancel()} small />
-                                        <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />                                    </div>
+                                        <Button color="success" label={labelButton} icon={mdiCheck} onClick={() => Send()} small />       
+                                    </div>
                                     <style jsx>{`
                                         .botones {
                                             display: flex;
                                             gap: 5px;
                                         }    
                                     `}
-                                    </style>
+                                    </style> */}
                                 </SectionMain>
                             </Card>
                             {tableppd &&(
@@ -910,9 +979,12 @@ const PedidosProduccionPage = () => {
                     <Column field="tipa_area" header="Area" sortable />
                     <Column 
                     body={rowData => (
-                    <div className='flex gap-3.5 justify-center'>
-                        <Button color="success" label="Edit" icon={mdiEye} onClick={() => EditTable(rowData)} small />
-                    </div>
+                        <div className='flex gap-3.5 justify-center'>
+                        <Menu model={generateMenuItemsPPD(rowData)} popup ref={menuLeft} id="popup_menu_left" />
+                        <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setRow(rowData);  menuLeft.current.toggle(event);
+              } }small aria-controls="popup_menu_left" aria-haspopup />
+                      
+                       </div>
                     )} />
                     </DataTable>
                     </Card>
