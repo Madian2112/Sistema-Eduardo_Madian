@@ -8,8 +8,15 @@ export interface OrdenPedidosEnvioViewModel {
     peor_FechaEntrada: string;
     peor_Impuestos: number;
     usua_UsuarioCreacion:number;
+    peor_Obsevaciones: string,
+
     peor_FechaCreacion: string;
     usua_UsuarioModificacion:number;
     peor_FechaModificacion: string;
+  }
+
+
+  export interface OrdenPedidosFinishViewModel {
+    peor_Id: number;
   }
   

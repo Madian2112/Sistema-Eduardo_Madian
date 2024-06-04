@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,7 +40,7 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
 import { ListBox } from 'primereact/listbox';
 
@@ -356,9 +356,6 @@ const [IMG, setIMG] = useState("");
 
 
 //#region DETAILS
-//AUTOCOMPLETE
-
-
 const [Material, setMateriales] = useState([]);
 const [MaterialDesc, setMaterialDesc] = useState(null);
 const [mate_Descripcion, setmate_Descripcion] = useState("");
@@ -380,63 +377,78 @@ useEffect(() => {
   fetchMaterial()
 }, []);
 
-const itemTemplate = (data) => {
+const itemTemplate = (data, setFieldValue) => {
   return (
     <div className="col-12">
-      <div className="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+      <div className="flex flex-column xl:flex-row xl:items-center p-4 gap-4">
         <img
-          className="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round"
+          className="w-10 h-10 sm:w-14 sm:h-14 xl:w-16 xl:h-16 shadow-2 block xl:block mx-auto border-round"
           src={data.mate_Imagen}
-          alt={data.name}
+          alt={data.mate_Descripcion}
         />
-        <div className="flex flex-column lg:flex-row justify-content-between align-items-center xl:align-items-start lg:flex-1 gap-4">
-          <div className="flex flex-column align-items-center lg:align-items-start gap-3">
-            <div className="flex flex-column gap-1">
-              <div className="text-2xl font-bold text-900">{data.mate_Descripcion}</div>
+        <div className="flex flex-col lg:flex-row justify-between items-center xl:items-center lg:flex-1 gap-4">
+          <div className="flex flex-col items-center lg:items-start gap-3">
+            <div className="text-center lg:text-left text-base font-semibold text-600">
+              {data.mate_Descripcion}
             </div>
           </div>
-          <div className="flex flex-row lg:flex-column align-items-center lg:align-items-end gap-4 lg:gap-2">
-            <Button icon="pi pi-shopping-cart" label="Add to Cart"  onClick={() =>{setmate_Descripcion(data.mate_Descripcion), console.log(data.mate_Descripcion)}}></Button>
+          <div className="flex flex-row lg:flex-col items-center lg:items-end gap-4 lg:gap-2 lg:ml-auto">
+            <span
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+              onClick={() => {
+                setFieldValue('mate_Descripcion', data.mate_Descripcion);
+                setFieldValue('mate_Id', data.mate_Id)
+ }}
+            >
+              Add to Cart
+            </span>
           </div>
         </div>
       </div>
     </div>
   );
 };
-const search = (event) => {
-  // Timeout to emulate a network connection
-  setTimeout(() => {
-      let _filteredCountries;
+const validationSchemaDetails = Yup.object().shape({
+  mate_Descripcion: Yup.string().required('Material is requerid'),
+  prod_Cantidad: Yup.string().required('Amount is requerid'),
+  prod_Precio:Yup.string().required('Price is requerid'),
+ });
 
-      if (!event.query.trim().length) {
-          _filteredCountries = [...Material];
-      }
-      else {
-          _filteredCountries = Material.filter((country) => {
-              return country.mate_Descripcion.toLowerCase().startsWith(event.query.toLowerCase());
-          });
-      }
+ const SendDetails = async (values) => {
+  const productData: OrdenPedidosEnvioDetailsViewModel = {
+    pedi_Id:peor_Id,
+    mate_Descripcion:values.mate_Descripcion,
+    mate_Id: values.mate_Id,
+    prod_Cantidad:values.prod_Cantidad,
+    prod_Precio: values.prod_Precio,
+    usua_UsuarioCreacion:1,
+    prod_FechaCreacion: new Date().toISOString(),
+  };
+  console.log(productData)
 
-      setFilteredCountries(_filteredCountries);
-  }, 250);
+    try {
+      const response = await sendPedidosOrdenDetalles(productData);
+      if (response.status === 200) {
+        if (response.data.message == "Operación completada exitosamente.") {
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Added successfully`, life: 3000 });
+          GetOrdenPedidosDetalles(peor_Id);
+        }else{
+          toast.current?.show({ severity: 'success', summary: 'Success', detail: `Error`, life: 3000 });
+        }
+      
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+ 
+ 
 }
-const searchCodigo = (event) => {
-  // Timeout to emulate a network connection
-  setTimeout(() => {
-      let _filteredCountries;
 
-      if (!event.query.trim().length) {
-          _filteredCountries = [...Material];
-      }
-      else {
-          _filteredCountries = Material.filter((country) => {
-              return country.mate_Id.toString().toLowerCase().startsWith(event.query.toLowerCase());
-          });
-      }
 
-      setfilteredCountriesCodigo(_filteredCountries);
-  }, 250);
-}
 //Variables
 
 //#endregion
@@ -444,10 +456,10 @@ const searchCodigo = (event) => {
 //#region DATAMASTER-DETAIL
 const [GetPedidosDetalles, setPedidosDetalles] = useState([]);
 const [loadingDetalles, setloadingDetalles] = useState(false);
-const GetOrdenPedidosDetalles = async () => {
+const GetOrdenPedidosDetalles = async (valor) => {
   setloadingDetalles(true);
   try {
-    const data = await getPedidosOrdenDetalles(2);
+    const data = await getPedidosOrdenDetalles(valor);
     console.log("EEEEEES")
     console.log(data)
     setPedidosDetalles(data);
@@ -459,7 +471,7 @@ const GetOrdenPedidosDetalles = async () => {
 };
 
 useEffect(() => {
-  GetOrdenPedidosDetalles();
+  GetOrdenPedidosDetalles(peor_Codigo);
 }, []); 
 const menuLeftDetalles = useRef(null);
 const itemsDetalles = [
@@ -851,26 +863,25 @@ const Delete = async () => {
           <div>
             <Formik
   initialValues={{
-    mate_Descripcion: mate_Descripcion,
-    pedi_Id: peor_Codigo,
-    mate_Id: prov_Id,
-    prod_Cantidad: selectedPais,
-    prod_Precio: selectedProvincia,
+    mate_Descripcion: "",
+    mate_Id: "",
+    prod_Cantidad: "",
+    prod_Precio: "",
   }}
-  validationSchema={validationSchema}
+  validationSchema={validationSchemaDetails}
   onSubmit={(values, { setSubmitting }) => {
     setSubmitting(false);
-    Send();
+    SendDetails(values);
   }}
 >
   {({ errors, touched, setFieldValue }) => (
     <Form className="w-full">
       <div className="flex justify-between mb-6">
-        <div className="flex flex-col mr-4 flex-1">
+        <div className="flex flex-col mr-4 flex-1 ">
         <div className="card">
       <DataScroller
         value={Material}
-        itemTemplate={itemTemplate}
+        itemTemplate={(data) => itemTemplate(data, setFieldValue)}
         rows={200}
         buffer={0.4}
         inline scrollHeight="300px"
@@ -880,14 +891,10 @@ const Delete = async () => {
  
         
         </div>
-        <div className="flex flex-col mr-4 flex-1">
+        <div className="flex flex-col mr-4 flex-1 justify-between">
         <label htmlFor="name" className="mb-2">Material</label>
         <Field
             name="mate_Descripcion"
-            onChange={(e) => {
-              setFieldValue('mate_Descripcion', e.target.value);
-              setmate_Descripcion(e.target.value);
-            }}
             className={`border p-2 ${touched.mate_Descripcion && errors.mate_Descripcion ? 'border-red-500' : 'border-gray-300'}`}
           />
           {touched.mate_Descripcion && errors.mate_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.mate_Descripcion}</div>}
@@ -896,7 +903,6 @@ const Delete = async () => {
             name="prod_Cantidad"
             onChange={(e) => {
               setFieldValue('prod_Cantidad', e.target.value);
-              Setpeor_Codigo(e.target.value);
             }}
             className={`border p-2 ${touched.prod_Cantidad && errors.prod_Cantidad ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -906,7 +912,6 @@ const Delete = async () => {
             name="prod_Precio"
             onChange={(e) => {
               setFieldValue('prod_Precio', e.target.value);
-              Setpeor_Codigo(e.target.value);
             }}
             className={`border p-2 ${touched.prod_Precio && errors.prod_Precio ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -915,9 +920,22 @@ const Delete = async () => {
 
       </div>
 
-      <div className="flex justify-end gap-4">
-           <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" >Send</button>
-         </div>
+      <div className="flex flex-row flex-grow-2 gap-2 align-items-center">
+            <button
+              type="button"
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              style={{ height: '44px' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              style={{ height: '44px' }}
+            >
+              Add
+            </button>
+          </div>
 
     </Form>
   )}
