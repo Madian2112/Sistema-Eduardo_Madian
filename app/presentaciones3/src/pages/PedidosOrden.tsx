@@ -560,10 +560,6 @@ const ItemDetallesX = (ItemOMaterial) => {
       {
         label: 'Edit',
         icon: 'pi pi-refresh'
-      },
-      {
-        label: 'Finish',
-        icon: 'pi pi-upload'
       }
     );
   } else if (ItemOMaterial == 1) {
@@ -692,6 +688,9 @@ const Delete = async () => {
             setSelectedPais(rowData.pais_Id)
             setSelectedProvincia(rowData.pvin_Id)
             GetOrdenPedidosDetalles(rowData.peor_Id)
+            if (rowData.duca_No_Duca != null) {
+              handleInputChange(rowData.duca_No_Duca)
+            }
   
   } }small aria-controls="popup_menu_left" aria-haspopup />
           
