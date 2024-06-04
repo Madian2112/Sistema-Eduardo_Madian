@@ -53,6 +53,8 @@ const toast = useRef<Toast>(null);
 //Collapse
 const [isExpanded, setIsExpanded] = useState(true);
 const [isExpandedCreate, setIsExpandedCreate] = useState(false);
+const [pais_id, setpais_id] = useState("");
+const [pvin_Id, setpvin_Id] = useState("");
 
 const handleModalCreate = () => {
   EditOrCreate("Create")
@@ -62,8 +64,13 @@ const handleModalCreate = () => {
   Setduca_No_Duca("")
   Setpeor_Impuestos(0)
   Setciud_Id("")
+  setpais_id("")
+setSelectedPais("0")
+setSelectProveedor("0")
+setSelectedProvincia("0")
   setSelectDefaultProveedor("0")
   setSelectDefaultPaisId("0")
+  setDefaulProvinciaId("0")
   setSelectedProvincia(null)
   Setpeor_DireccionExacta("")
   Setpeor_FechaEntrada("")
@@ -206,6 +213,9 @@ useEffect(() => {
             const data = await getProveedores();
             setProveedores(data);
             const defaultProveedor = data.find(prov => prov.prov_Id === parseInt(defaultProveedorId));
+            if (parseInt(defaultProveedorId) != 0 ) {
+              Setprov_Id("1")
+            }
             setSelectProveedor(defaultProveedor);
             setLoadingDrop(false);
         } catch (error) {
@@ -227,9 +237,11 @@ const fetchPaises = async () => {
   setLoadingDrop(true);
   try {
     const data = await getPaises();
-    setProvincias([]);
     setPaises(data);
     const defaultPais = data.find(prov => prov.pais_Id === parseInt(defaultPaisId));
+    if (parseInt(defaultPaisId) != 0) {
+      setpais_id("1")
+    }
     setSelectedPais(defaultPais);
     setLoadingDrop(false);
   } catch (error) {
@@ -241,13 +253,13 @@ fetchPaises()
 }, [defaultPaisId]);
 
 const [ciudades, setCiudades] = useState([]);
+const [defaultCiudadId, setdefaultCiudadId] = useState('0');
 const [selectedCiudad, setSelectedCiudad] = useState(null);
+
+
 const [provincias, setProvincias] = useState([]);
+const [defaultProvinciaId, setDefaulProvinciaId] = useState('0');
 const [selectedProvincia, setSelectedProvincia] = useState(null);
-const [loadingDrop, setLoadingDrop] = useState(false);
-
-
-
 
 
 const fetchProvincias = async (valor) => {
@@ -257,8 +269,12 @@ const fetchProvincias = async (valor) => {
         setCiudades([]);
         console.log(valor)
         const data = await getProvinciasPorPaises(valor);
-        console.log(data)
         setProvincias(data);
+        const defaultProvin = data.find(prov => prov.pvin_Id === parseInt(defaultProvinciaId));
+        if (parseInt(defaultProvinciaId) != 0 ) {
+          setpvin_Id("1")
+        }
+        setSelectProveedor(defaultProvin);
       }
   } catch (error) {
     toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
@@ -266,16 +282,38 @@ const fetchProvincias = async (valor) => {
   }
 };
 
+useEffect(() => {
+  fetchProvincias(defaultPaisId)
+}, [defaultProvinciaId]);
+
 const fetchCiudades = async (valor) => {
   if (valor) {
     const data = await getCiudadesPorProvincias(valor);
     setCiudades(data);
+    const defaultCiudad = data.find(prov => prov.ciud_Id === parseInt(defaultCiudadId));
+    if (parseInt(defaultCiudadId) != 0 ) {
+      Setciud_Id("1")
+    }
+    setSelectedCiudad(defaultCiudad);
   }
   else {
     setCiudades([]);
     console.log("La provincia no tenia ciuadad");
   }
 };
+
+useEffect(() => {
+  fetchCiudades(defaultProvinciaId)
+}, [defaultCiudadId]);
+const [loadingDrop, setLoadingDrop] = useState(false);
+
+
+
+
+
+
+
+
 
 
 
@@ -297,8 +335,8 @@ const ValorImpuesto = () => {
 const validationSchema = Yup.object().shape({
   peor_Codigo: Yup.string().required('Code is requerid'),
   prov_Id: Yup.string().required('Supplier is requerid'),
-  pvin_Id:Yup.object().required('Province is requerid'),
-  pais_Id: Yup.object().required('Country is requerid'),
+  pvin_Id:Yup.string().required('Province is requerid'),
+  pais_Id: Yup.string().required('Country is requerid'),
   ciud_Id: Yup.string().required('City is requerid'),
   peor_DireccionExacta: Yup.string().required('Exact address is requerid'),
   peor_FechaEntrada: Yup.string().required('Entry date is requerid'),
@@ -314,7 +352,7 @@ const Send = async () => {
     duca_No_Duca: duca_No_Duca,
     ciud_Id:parseFloat(ciud_Id),
     peor_DireccionExacta: peor_DireccionExacta,
-    peor_FechaEntrada: peor_FechaEntrada.toISOString(),
+    peor_FechaEntrada: peor_FechaEntrada,
     peor_Impuestos: peor_Impuestos,
     peor_Obsevaciones: peor_Obsevaciones,
     usua_UsuarioCreacion: 1,
@@ -704,13 +742,7 @@ const DeleteItem = async () => {
 
 };   
 
-const cities = [
-  { name: 'New York', code: 'NY' },
-  { name: 'Rome', code: 'RM' },
-  { name: 'London', code: 'LDN' },
-  { name: 'Istanbul', code: 'IST' },
-  { name: 'Paris', code: 'PRS' }
-];
+
 
 // Inicializar el estado con el valor por defecto
 
@@ -760,6 +792,7 @@ const cities = [
             setprovincia(rowData.pvin_Nombre)
             Setpeor_DireccionExacta(rowData.peor_DireccionExacta)
             Setpeor_FechaEntrada(rowData.peor_FechaEntrada)
+           
             Setpeor_Obsevaciones(rowData.peor_Obsevaciones)
             setFechaCreacion(rowData.peor_FechaCreacion)
             setFechaFechaModificacion(rowData.peor_FechaModificacion)
@@ -772,17 +805,17 @@ const cities = [
             Setciud_Id(rowData.ciud_Id)
          
             sendDeleteFormasEnvio
-            setSelectedProvincia(rowData.pvin_Id)
+
             GetOrdenPedidosDetalles(rowData.peor_Id)
             if (rowData.duca_No_Duca != null) {
               handleInputChange(rowData.duca_No_Duca)
             }
 
-            console.log(rowData.prov_Id)
-            setSelectDefaultProveedor(rowData.prov_Id)
+            setDefaulProvinciaId(rowData.prov_Id)
             setSelectDefaultPaisId(rowData.pais_Id)
+            setDefaulProvinciaId(rowData.pvin_Id)
+            setdefaultCiudadId(rowData.ciud_Id)
 
-            
 
       
     
@@ -862,9 +895,9 @@ const cities = [
     innerRef={formikRef}
   initialValues={{
     peor_Codigo: peor_Codigo,
-    prov_Id: selectProveedor,
-    pais_Id: selectedPais,
-    pvin_Id: selectedProvincia,
+    prov_Id: prov_Id,
+    pais_Id: pais_id,
+    pvin_Id: pvin_Id,
     duca_No_Duca: duca_No_Duca,
     ciud_Id: ciud_Id,
     peor_DireccionExacta: peor_DireccionExacta,
@@ -895,19 +928,25 @@ const cities = [
         </div>
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
-          <Dropdown
-            value={selectProveedor}
-            onChange={(e) => {
-              setSelectProveedor(e.value);
-              setFieldValue('prov_Id', e.value.prov_Id);
-              Setprov_Id(e.value.prov_Id);
-            }}
-            options={Proveedores}
-            optionLabel="prov_NombreCompania"
-            placeholder="Select a option"
-            className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
-            style={{ height: '42px', paddingTop: '0px' }}
-          />
+          <select
+                name="prov_Id"
+                value={selectProveedor}
+                className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
+                style={{ height: '42px', paddingTop: '0px' }}
+                onChange={(e) => {
+                  setSelectProveedor(e.target.value);
+                  setFieldValue('prov_Id', e.target.value);
+                  Setprov_Id(e.target.value);
+                }}
+            >
+                <option value="0" disabled>Select a option</option>
+                {Proveedores.map((prov) => (
+                    <option key={prov.prov_Id} value={prov.prov_Id}>
+                        {prov.prov_NombreCompania}
+                    </option>
+                ))}
+            </select>
+          
           {touched.prov_Id && errors.prov_Id && <div className="text-red-500 text-xs mt-1">{errors.prov_Id.toString()}</div>}
         </div>
         <div className="flex flex-col flex-1">
@@ -932,54 +971,68 @@ const cities = [
       <div className="flex justify-between mb-6">
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="name" className="mb-2">Country</label>
-          <Dropdown
-            value={selectedPais}
-            onChange={(e) => {
-              setSelectedPais(e.value);
-              setFieldValue('pais_Id', e.value);
-              fetchProvincias(e.value.pais_Id);
-            }}
-            options={paises}
-            optionLabel="pais_Nombre"
-            placeholder="Select a option"
-            className={`border p-2 ${touched.pais_Id && errors.pais_Id ? 'border-red-500' : 'border-gray-300'}`}
-            style={{ height: '42px', paddingTop: '0px' }}
-          />
+          <select
+                value={selectedPais}
+       
+                className={`border p-2 ${touched.pais_Id && errors.pais_Id ? 'border-red-500' : 'border-gray-300'}`}
+                style={{ height: '42px', paddingTop: '0px' }}
+                onChange={(e) => {
+                  setSelectedPais(e.target.value);
+                  setFieldValue('pais_Id', e.target.value);
+                  fetchProvincias(e.target.value);
+                }}
+            >
+                <option value="0" disabled>Select a option</option>
+                {paises.map((pais) => (
+                    <option key={pais.pais_Id} value={pais.pais_Id}>
+                        {pais.pais_Nombre}
+                    </option>
+                ))}
+            </select>
+   
           {touched.pais_Id && errors.pais_Id && <div className="text-red-500 text-xs mt-1">{errors.pais_Id.toString()}</div>}
         </div>
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Province</label>
-          <Dropdown
-            value={selectedProvincia}
-            onChange={(e) => {
-              setSelectedProvincia(e.value);
-              setFieldValue('pvin_Id', e.value);
-              fetchCiudades(e.value.pvin_Id);
-
-            }}
-            options={provincias}
-            optionLabel="pvin_Nombre"
-            placeholder="Select a option"
-            className={`border p-2 ${touched.pvin_Id && errors.pvin_Id ? 'border-red-500' : 'border-gray-300'}`}
-            style={{ height: '42px', paddingTop: '0px'  }}
-          />
+          <select
+                value={selectedProvincia}
+                onChange={(e) => {
+                  setSelectedProvincia(e.target.value);
+                  setFieldValue('pvin_Id', e.target.value);
+                  fetchCiudades(e.target.value);
+                }}
+                className={`border p-2 ${touched.pvin_Id && errors.pvin_Id ? 'border-red-500' : 'border-gray-300'}`}
+                style={{ height: '42px', paddingTop: '0px' }}
+            >
+                <option value="" disabled>Select a option</option>
+                {provincias.map((prov) => (
+                    <option key={prov.pvin_Id} value={prov.pvin_Id}>
+                        {prov.pvin_Nombre}
+                    </option>
+                ))}
+            </select>
           {touched.pvin_Id && errors.pvin_Id && <div className="text-red-500 text-xs mt-1">{errors.pvin_Id.toString()}</div>}
         </div>
         <div className="flex flex-col flex-1">
           <label htmlFor="year" className="mb-2">City</label>
-          <Dropdown
-            value={selectedCiudad}
-            onChange={(e) => {
-              setSelectedCiudad(e.value);
-              setFieldValue('ciud_Id', e.value.ciud_Id);
-              Setciud_Id(e.value.ciud_Id);
-            }}
-            options={ciudades}
-            optionLabel="ciud_Nombre"
-            placeholder="Select a option"
-            className={`border p-2 ${touched.ciud_Id && errors.ciud_Id ? 'border-red-500' : 'border-gray-300'}`}
-            style={{ height: '42px', paddingTop: '0px' }}
-          />
+          <select
+                value={selectedCiudad}
+                onChange={(e) => {
+                  setSelectedCiudad(e.target.value);
+                  setFieldValue('ciud_Id', e.target.value);
+                  Setciud_Id(e.target.value);
+                }}
+                className={`border p-2 ${touched.ciud_Id && errors.ciud_Id ? 'border-red-500' : 'border-gray-300'}`}
+                style={{ height: '42px', paddingTop: '0px' }}
+            >
+                <option value="" disabled>Select a option</option>
+                {ciudades.map((ciud) => (
+                    <option key={ciud.ciud_Id} value={ciud.ciud_Id}>
+                        {ciud.ciud_Nombre}
+                    </option>
+                ))}
+            </select>
+    
           {touched.ciud_Id && errors.ciud_Id && <div className="text-red-500 text-xs mt-1">{errors.ciud_Id.toString()}</div>}
         </div>
       </div>
@@ -1007,7 +1060,7 @@ const cities = [
   }
 `}</style>
   <Calendar 
-    value={peor_FechaEntrada} 
+    value={peor_FechaEntrada ? new Date(peor_FechaEntrada) : null} 
     onChange={(e) => { 
       Setpeor_FechaEntrada(e.value); 
       setFieldValue('peor_FechaEntrada', e.target.value);
@@ -1017,7 +1070,7 @@ const cities = [
     inputStyle={{ border: 'none' }}
   />
 
-  {touched.peor_FechaEntrada && errors.peor_FechaEntrada && <div className="text-red-500 text-xs mt-1">{errors.peor_FechaEntrada.toString()}</div>}
+  {touched.peor_FechaEntrada && errors.peor_FechaEntrada && <div className="text-red-500 text-xs mt-1">Fecha vacia</div>}
 </div>
         <div className="flex flex-col flex-1 items-center">
           <label htmlFor="impuesto" className="mb-2">Impuesto</label>
