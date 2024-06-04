@@ -472,7 +472,7 @@ const fetchMaterialDuca = async (Valor) => {
   }
 };
 const [ItemOMaterial, setItemOMaterial] = useState(0);
-
+const [Active, setActive] = useState(false);
 const handleInputChange = async (e) => {
 
   const count = await fetchMaterialDuca(e);
@@ -480,8 +480,10 @@ const handleInputChange = async (e) => {
   if (count > 0) {
    
     setItemOMaterial(1)
+    setActive(true)
   } else {
     setItemOMaterial(0)
+    setActive(false)
     fetchMaterial();
   }
 };
@@ -1107,6 +1109,7 @@ const SendSubDetails = async (values) => {
           <label htmlFor="year" className="mb-2">Province</label>
           <select
                 value={selectedProvincia}
+              
                 onChange={(e) => {
                   setSelectedProvincia(e.target.value);
                   setFieldValue('pvin_Id', e.target.value);

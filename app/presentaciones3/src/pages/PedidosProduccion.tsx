@@ -69,6 +69,8 @@ const PedidosProduccionPage = () => {
 
     //#region ENVIAR DATOS A LA API
     const Send = async () => {
+        try 
+        {
         const productData: PedidosProduccionViewModel = {
             ppro_Id: 1,
             empl_Id: parseInt(selectedEmpleados),
@@ -223,6 +225,11 @@ const PedidosProduccionPage = () => {
                       } 
                 }
             }
+        }
+        }
+        catch
+        {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Seleccine un lote', life: 3000 });
         }
       }
 
