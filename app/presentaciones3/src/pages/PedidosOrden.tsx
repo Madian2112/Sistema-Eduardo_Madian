@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,9 +40,10 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosDeleteItemViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
 import { ListBox } from 'primereact/listbox';
+import { Row } from 'primereact/row';
 
 
 
@@ -58,11 +59,11 @@ const handleModalCreate = () => {
   setEnviado(0);
   setIsExpanded(!isExpanded);
   Setpeor_Codigo("")
-  Setprov_Id(null)
   Setduca_No_Duca("")
   Setpeor_Impuestos(0)
   Setciud_Id("")
-  setSelectedPais(null)
+  setSelectDefaultProveedor("0")
+  setSelectDefaultPaisId("0")
   setSelectedProvincia(null)
   Setpeor_DireccionExacta("")
   Setpeor_FechaEntrada("")
@@ -150,7 +151,10 @@ useEffect(() => {
   GetOrdenPedidos();
 }, []); 
 const menuLeft = useRef(null);
+const [Prueba, setPrueba] = useState([]);
 const generateMenuItems = (rowData) => {
+  console.log("peor_finalizacion value:", Prueba); // Agrega este log
+
   const baseItems = [
     {
       label: 'Details',
@@ -159,7 +163,7 @@ const generateMenuItems = (rowData) => {
     }
   ];
 
-  if (!rowData.peor_finalizacion) {
+  if (!Prueba) {
     baseItems.push(
       {
         label: 'Edit',
@@ -191,40 +195,60 @@ const [peor_Obsevaciones, Setpeor_Obsevaciones] = useState('');
 const [peor_Impuestos, Setpeor_Impuestos] = useState(0);
 
 //DropDowns
-const [selectProveedor, setSelectProveedor] = useState(null);
 const [Proveedores, setProveedores] = useState([]);
-const [selectedPais, setSelectedPais] = useState(null);
+const [defaultProveedorId, setSelectDefaultProveedor] = useState('0'); 
+const [selectProveedor, setSelectProveedor] = useState(null);
+
+useEffect(() => {
+    const fetchProveedores = async () => {
+        setLoadingDrop(true);
+        try {
+            const data = await getProveedores();
+            setProveedores(data);
+            const defaultProveedor = data.find(prov => prov.prov_Id === parseInt(defaultProveedorId));
+            setSelectProveedor(defaultProveedor);
+            setLoadingDrop(false);
+        } catch (error) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch proveedores', life: 3000 });
+            setLoadingDrop(false);
+        }
+    };
+
+    fetchProveedores();
+}, [defaultProveedorId]);
+
+
 const [paises, setPaises] = useState([]);
-const [ciudades, setCiudades] = useState([]);
-const [selectedCiudad, setSelectedCiudad] = useState(null);
-const [provincias, setProvincias] = useState([]);
-const [selectedProvincia, setSelectedProvincia] = useState(null);
-const [loadingDrop, setLoadingDrop] = useState(false);
+const [defaultPaisId, setSelectDefaultPaisId] = useState('0'); 
+const [selectedPais, setSelectedPais] = useState(null);
 
-const AxioProveedores = async () => {
-  setLoadingDrop(true);
-  try {
-    const data = await getProveedores();
-    setProveedores(data);
-    setLoadingDrop(false);
-  } catch (error) {
-    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch proveedores', life: 3000 });
-    setLoadingDrop(false);
-  }
-};
-
+useEffect(() => {
 const fetchPaises = async () => {
   setLoadingDrop(true);
   try {
     const data = await getPaises();
     setProvincias([]);
     setPaises(data);
+    const defaultPais = data.find(prov => prov.pais_Id === parseInt(defaultPaisId));
+    setSelectedPais(defaultPais);
     setLoadingDrop(false);
   } catch (error) {
     toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
     setLoadingDrop(false);
   }
 };
+fetchPaises()
+}, [defaultPaisId]);
+
+const [ciudades, setCiudades] = useState([]);
+const [selectedCiudad, setSelectedCiudad] = useState(null);
+const [provincias, setProvincias] = useState([]);
+const [selectedProvincia, setSelectedProvincia] = useState(null);
+const [loadingDrop, setLoadingDrop] = useState(false);
+
+
+
+
 
 const fetchProvincias = async (valor) => {
   setLoadingDrop(true);
@@ -253,13 +277,8 @@ const fetchCiudades = async (valor) => {
   }
 };
 
-useEffect(() => {
-  fetchPaises();
-}, []);
 
-useEffect(() => {
-  AxioProveedores();
-}, []);
+
 
 //Impuesto
 const [checked, setChecked] = useState(false);
@@ -456,6 +475,8 @@ const itemTemplate = (data, setFieldValue) => {
     </div>
   );
 };
+
+
 const validationSchemaDetails = Yup.object().shape({
   mate_Descripcion: Yup.string().required('Material is requerid'),
   prod_Cantidad: Yup.string().required('Amount is requerid'),
@@ -528,14 +549,30 @@ const GetOrdenPedidosDetalles = async (valor) => {
   setloadingDetalles(true);
   try {
     const data = await getPedidosOrdenDetalles(valor);
-    console.log("EEEEEES")
-    console.log(data)
-    setPedidosDetalles(data);
+    const parsedData = data.map(item => ({
+      ...item,
+      detalles: JSON.parse(item.detalles)
+    }));
+    console.log("Datos parseados:", parsedData);
+    setPedidosDetalles(parsedData);
     setloadingDetalles(false);
   } catch (error) {
     toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch formas envio', life: 3000 });
     setloadingDetalles(false);
   }
+};
+const renderDetalles = (rowData) => {
+  console.log("EL DETALLES ES")
+  console.log(rowData)
+  return (
+    <DataTable value={rowData.detalles} responsiveLayout="scroll">
+      <Column field="clie_Nombre_O_Razon_Social" header="Client Name" sortable />
+      <Column field="code_CantidadPrenda" header="Quantity" sortable />
+      <Column field="code_SexoEvaluado" header="Sexo" sortable />
+      <Column field="esti_DescripcionEvaludado" header="Descripcion" sortable />
+      <Column field="orco_Id" header="Code" sortable />
+    </DataTable>
+  );
 };
 
 useEffect(() => {
@@ -549,7 +586,8 @@ const ItemDetallesX = (ItemOMaterial) => {
       items: [
         {
           label: 'Add',
-          icon: 'pi pi-upload'
+          icon: 'pi pi-upload',
+          command: () => console.log('Add clicked')
         }
       ]
     }
@@ -559,14 +597,16 @@ const ItemDetallesX = (ItemOMaterial) => {
     items[0].items.push(
       {
         label: 'Edit',
-        icon: 'pi pi-refresh'
+        icon: 'pi pi-refresh',
+        command: () => console.log('Edit clicked')
       }
     );
   } else if (ItemOMaterial == 1) {
     items[0].items.push(
       {
         label: 'Delete',
-        icon: 'pi pi-times'
+        icon: 'pi pi-times',
+        command: () => setisModalDeleteActive(true)
       }
     );
   }
@@ -574,9 +614,12 @@ const ItemDetallesX = (ItemOMaterial) => {
   return items;
 };
 
+
+
 const itemsDetalles = ItemDetallesX(ItemOMaterial);
 //#endregion
 //Details Table
+const [expandedRows, setExpandedRows] = useState(null);
 const [isExpandedDetails, setIsExpandedDetails] = useState(false);
 const [proveedor, setproveedor] = useState("");
 const [ciudad, setciudad] = useState("");
@@ -604,6 +647,7 @@ const togglePanelDetails = () => {
 
 //#region FINISH
 const [isModalFinish, setisModalFinishActive] = useState(false);
+
 const Delete = async () => {
   const productData: OrdenPedidosFinishViewModel = {
     peor_Id:peor_Id
@@ -630,6 +674,46 @@ const Delete = async () => {
 };
 //#endregion
 
+//Delete Detalle Item
+const [isModalDelete, setisModalDeleteActive] = useState(false);
+const [item_Id, setitem_Id] = useState(0);
+const [prod_Id, setprod_Id] = useState(0);
+const DeleteItem = async () => {
+  const productData: OrdenPedidosDeleteItemViewModel = {
+    prod_Id:prod_Id,
+    item_Id:item_Id
+  };
+  console.log(productData)
+
+    try {
+      const response = await sendDeleteItemPedidosOrden(productData);
+      if (response.status === 200) {
+        console.log('Success:', response.data);
+        setisModalDeleteActive(false);
+        GetOrdenPedidosDetalles(peor_Id)
+        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Delete successfully`, life: 3000 });
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+
+
+};   
+
+const cities = [
+  { name: 'New York', code: 'NY' },
+  { name: 'Rome', code: 'RM' },
+  { name: 'London', code: 'LDN' },
+  { name: 'Istanbul', code: 'IST' },
+  { name: 'Paris', code: 'PRS' }
+];
+
+// Inicializar el estado con el valor por defecto
+
   return (
     <>
     <Toast ref={toast}/>
@@ -637,6 +721,7 @@ const Delete = async () => {
     <Head>
            <title>{getPageTitle('Pedidos Orden')}</title>
     </Head>
+
 
     {isExpanded && (
       
@@ -660,7 +745,8 @@ const Delete = async () => {
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
             <Menu model={generateMenuItems(rowData)} popup ref={menuLeft} id="popup_menu_left" />
-            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{menuLeft.current.toggle(event);Setpeor_Codigo(rowData.peor_Codigo);  setproveedor(rowData.prov_NombreCompania); 
+            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{setPrueba(rowData.peor_finalizacion);  menuLeft.current.toggle(event);
+            Setpeor_Codigo(rowData.peor_Codigo);  setproveedor(rowData.prov_NombreCompania); 
             Setduca_No_Duca("Vacio");
             Setpeor_Impuestos(0);
             if (rowData.duca_No_Duca != null) {
@@ -679,18 +765,27 @@ const Delete = async () => {
             setFechaFechaModificacion(rowData.peor_FechaModificacion)
             setUsuarioCreacion(rowData.usuarioCreacionNombre)
             setUsuarioModificacion(rowData.usuarioModificacionNombre)
-
+       
+       
             //Editado
             Setpeor_Id(rowData.peor_Id)
-            setSelectProveedor(rowData.prov_Id)
-            Setprov_Id(rowData.prov_Id)
             Setciud_Id(rowData.ciud_Id)
-            setSelectedPais(rowData.pais_Id)
+         
+            sendDeleteFormasEnvio
             setSelectedProvincia(rowData.pvin_Id)
             GetOrdenPedidosDetalles(rowData.peor_Id)
             if (rowData.duca_No_Duca != null) {
               handleInputChange(rowData.duca_No_Duca)
             }
+
+            console.log(rowData.prov_Id)
+            setSelectDefaultProveedor(rowData.prov_Id)
+            setSelectDefaultPaisId(rowData.pais_Id)
+
+            
+
+      
+    
   
   } }small aria-controls="popup_menu_left" aria-haspopup />
           
@@ -716,6 +811,24 @@ const Delete = async () => {
       <div className="flex justify-center gap-4">
         <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
         <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalFinishActive(false)}>No</button>
+      </div>
+</CardBoxModal>
+
+<CardBoxModal
+  title="delete"
+  buttonColor="info"
+  buttonLabel="Add"
+  isActive={isModalDelete}
+  onConfirm={handleModalCreate}
+  onCancel={handleModalCreate}
+>
+
+<div className="text-center mb-4">
+        <p>Are you sure you want to delete?</p>
+      </div>
+      <div className="flex justify-center gap-4">
+        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={DeleteItem}>Yes</button>
+        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteActive(false)}>No</button>
       </div>
 </CardBoxModal>
 
@@ -749,7 +862,7 @@ const Delete = async () => {
     innerRef={formikRef}
   initialValues={{
     peor_Codigo: peor_Codigo,
-    prov_Id: prov_Id,
+    prov_Id: selectProveedor,
     pais_Id: selectedPais,
     pvin_Id: selectedProvincia,
     duca_No_Duca: duca_No_Duca,
@@ -783,7 +896,6 @@ const Delete = async () => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
           <Dropdown
-            name='prov_Id'
             value={selectProveedor}
             onChange={(e) => {
               setSelectProveedor(e.value);
@@ -796,7 +908,7 @@ const Delete = async () => {
             className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
             style={{ height: '42px', paddingTop: '0px' }}
           />
-          {touched.prov_Id && errors.prov_Id && <div className="text-red-500 text-xs mt-1">{errors.prov_Id}</div>}
+          {touched.prov_Id && errors.prov_Id && <div className="text-red-500 text-xs mt-1">{errors.prov_Id.toString()}</div>}
         </div>
         <div className="flex flex-col flex-1">
           <label htmlFor="year" className="mb-2">No. Duca</label>
@@ -1034,12 +1146,16 @@ const Delete = async () => {
   )}
 </Formik>
 <DataTable 
-         value={GetPedidosDetalles} 
-         loading={loadingDetalles} 
-         responsiveLayout="scroll"
-         paginator 
-         rows={10}
-       >
+        value={GetPedidosDetalles} 
+        loading={loadingDetalles} 
+        responsiveLayout="scroll"
+        paginator 
+        rows={10}
+        expandedRows={expandedRows}
+        onRowToggle={(e) => setExpandedRows(e.data)}
+        rowExpansionTemplate={renderDetalles}
+      >
+        <Column expander style={{ width: '3em' }} />
          <Column field="mate_Descripcion" header="Material" sortable />
          <Column field="prod_Cantidad" header="Amount" sortable />
          <Column field="prod_Precio" header="Price" sortable />
@@ -1047,7 +1163,7 @@ const Delete = async () => {
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
             <Menu model={itemsDetalles} popup ref={menuLeftDetalles} id="popup_menu_left" />
-            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) => {menuLeftDetalles.current.toggle(event); }} small aria-controls="popup_menu_left" aria-haspopup />
+            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) => {menuLeftDetalles.current.toggle(event); setitem_Id(rowData.item_Id); setprod_Id(rowData.prod_Id) }} small aria-controls="popup_menu_left" aria-haspopup />
           
            </div>
          )} />
