@@ -975,6 +975,26 @@ export const sendDeleteItemPedidosOrden = async (productData) => {
   }
 };
 
+
+export const sendDeleteSubItemPedidosOrden = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PODetallePorPedidoOrdenDetalle/Eliminar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 //#endregion
 //#region CompraDetalle
 export const getCompraDetalle = async () => {

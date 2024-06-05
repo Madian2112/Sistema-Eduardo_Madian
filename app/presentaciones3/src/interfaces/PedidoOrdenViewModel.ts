@@ -20,8 +20,14 @@ export interface OrdenPedidosFinishViewModel {
 }
 
 export interface OrdenPedidosDeleteItemViewModel {
+  tabla:number;
   prod_Id: number;
   item_Id:number;
+}
+
+
+export interface OrdenPedidosDeleteSubItemViewModel {
+  ocpo_Id:number;
 }
 
 export interface OrdenPedidosDetailsSendViewModel {

@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendDeleteSubItemPedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,7 +40,7 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosDeleteItemViewModel, OrdenPedidosDetailsSendViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosDeleteItemViewModel, OrdenPedidosDeleteSubItemViewModel, OrdenPedidosDetailsSendViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
 import { ListBox } from 'primereact/listbox';
 import { Row } from 'primereact/row';
@@ -616,8 +616,7 @@ const GetOrdenPedidosDetalles = async (valor) => {
   }
 };
 const renderDetalles = (rowData) => {
-  console.log("EL DETALLES ES")
-  console.log(rowData)
+
   return (
     <DataTable value={rowData.detalles} responsiveLayout="scroll">
       <Column field="clie_Nombre_O_Razon_Social" header="Client Name" sortable />
@@ -625,6 +624,26 @@ const renderDetalles = (rowData) => {
       <Column field="code_SexoEvaluado" header="Sexo" sortable />
       <Column field="esti_DescripcionEvaludado" header="Descripcion" sortable />
       <Column field="orco_Id" header="Code" sortable />
+      <Column 
+          body={rowData => (
+           <div className='flex gap-3.5 justify-center'>
+             <Button color="success"  icon={mdiDetails} onClick={(event) =>{
+        console.log(rowData.ocpo_Id)
+        setocpo_Id(rowData.ocpo_Id)
+
+        setisModalDeleteSubItem(true)
+            
+
+
+      
+    
+  
+  } } />
+          
+   
+          
+           </div>
+         )} />
     </DataTable>
   );
 };
@@ -650,9 +669,9 @@ const ItemDetallesX = (ItemOMaterial) => {
   if (ItemOMaterial == 0) {
     items[0].items.push(
       {
-        label: 'Edit',
-        icon: 'pi pi-refresh',
-        command: () => console.log('Edit clicked')
+        label: 'Delete',
+        icon: 'pi pi-times',
+        command: () => setisModalDeleteActive(true)
       }
     );
   } else if (ItemOMaterial == 1) {
@@ -734,6 +753,7 @@ const [item_Id, setitem_Id] = useState(0);
 const [prod_Id, setprod_Id] = useState(0);
 const DeleteItem = async () => {
   const productData: OrdenPedidosDeleteItemViewModel = {
+    tabla:ItemOMaterial, 
     prod_Id:prod_Id,
     item_Id:item_Id
   };
@@ -757,6 +777,36 @@ const DeleteItem = async () => {
 
 
 };   
+
+
+//DELETE SUBITEMS
+const [isModalDeleteSubItem, setisModalDeleteSubItem] = useState(false);
+const [ocpo_Id, setocpo_Id] = useState(0);
+const DeleteSubItem = async () => {
+  const productData: OrdenPedidosDeleteSubItemViewModel = {
+    ocpo_Id:ocpo_Id, 
+  };
+
+
+    try {
+      const response = await sendDeleteSubItemPedidosOrden(productData);
+      if (response.status === 200) {
+        console.log('Success:', response.data);
+        GetOrdenPedidosDetalles(peor_Id)
+        setisModalDeleteSubItem(false)
+        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Delete successfully`, life: 3000 });
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+
+
+};  
+
 
 //#region ADD DETAILS
 const [isModalAddDetails, setisModalAddDetails] = useState(false);
@@ -980,6 +1030,23 @@ const SendSubDetails = async (values) => {
       <div className="flex justify-center gap-4">
         <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={DeleteItem}>Yes</button>
         <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteActive(false)}>No</button>
+      </div>
+</CardBoxModal>
+<CardBoxModal
+  title="delete"
+  buttonColor="info"
+  buttonLabel="Add"
+  isActive={isModalDeleteSubItem}
+  onConfirm={handleModalCreate}
+  onCancel={handleModalCreate}
+>
+
+<div className="text-center mb-4">
+        <p>Are you sure you want to delete?</p>
+      </div>
+      <div className="flex justify-center gap-4">
+        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={DeleteSubItem}>Yes</button>
+        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteSubItem(false)}>No</button>
       </div>
 </CardBoxModal>
 
