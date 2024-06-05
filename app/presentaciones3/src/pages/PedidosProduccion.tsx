@@ -21,13 +21,15 @@ import SectionTitleLineWithButton from '../components/Section/TitleLineWithButto
 import { Formik, Form, Field } from 'formik';
 import { TabView, TabPanel } from 'primereact/tabview';
 import * as Yup from 'yup';
-import { getEmpleados, getPedidosProduccion, getLotes, getLotesStock, sendPedidosProduccion, sendPedidosProduccionDetalle, getPedidosProduccionDetalle, editPedidosProduccionDetalle } from './apiService/data/components/ApiService';
+import { getEmpleados, getPedidosProduccion, getLotes, getLotesStock, sendPedidosProduccion, sendPedidosProduccionDetalle, getPedidosProduccionDetalle, editPedidosProduccionDetalle, deletePedidosProduccion, sendPedidosProduccionDetalleEliminar } from './apiService/data/components/ApiService';
 import { PedidosProduccionViewModel } from '../interfaces/PedidoProduccionViewModel';
 import { PedidosProduccionDetalleViewModel } from '../interfaces/PedidosProduccionDetalleViewModel';
 import { Toast } from 'primereact/toast';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Menu } from 'primereact/menu';
+import CardBoxModal from '../components/CardBox/Modal'
+import Moment from 'moment';
 
 const PedidosProduccionPage = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -59,6 +61,13 @@ const PedidosProduccionPage = () => {
     const [ID, setID] = useState('');
     const [LabelDetails, setLabelDetails] = useState('Pedidos Produccion');
     const [Row, setRow] = useState('');
+    const [PedidosOrden, setPedidosOrden] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [saberDelete, setsaberDelete] = useState(0);
+    const [ValorPPD, setValorPPD] = useState(0);
+    const [FechaProv, setFechaProv] = useState("");
+    const [idPrem, setidPrem] = useState('');
+    const [hola, sethola] = useState(0);
 
     const validationSchema = Yup.object().shape({
         ppro_Fecha: Yup.string().required('Date is required'),
@@ -270,7 +279,136 @@ const PedidosProduccionPage = () => {
     useEffect(() => {
     }, [setppro_Id]);
 
+    useEffect(() => {
+    }, [setValorPPD]);
+
       //#endregion
+
+      const Delete = async () => {
+        const productData: PedidosProduccionViewModel = {
+            ppro_Id: ppro_Id,
+            empl_Id: 1,
+            empl_NombreCompleto: "",
+            ppro_Fecha: new Date().toISOString(),
+            ppro_Estados: "true",
+            ppro_Observaciones: "",
+            ppro_Finalizado: false,
+            usua_UsuarioCreacion:1,
+            lote_Id: 1,
+            ppde_Cantidad: 1,
+            UsuarioCreacionNombre: "",
+            ppro_FechaCreacion: new Date().toISOString(),
+            usua_UsuarioModificacion: 1,
+            UsuarioModificacionNombre: "",
+            ppro_FechaModificacion: new Date().toISOString(),
+            ppro_Estado: true,
+            detalles:"",
+            mensaje: "",
+        };
+
+        const ppDetalle: PedidosProduccionDetalleViewModel = {
+            ppde_Id: ValorPPD,
+            ppro_Id:  1, 
+            lote_Id: 1,
+            lote_Stock: "", 
+            lote_CodigoLote: "hola",
+            ppde_Cantidad: 1,
+            mate_Id: 1,
+            mate_Descripcion: "hola", 
+            colr_Codigo: "hola", 
+            colr_Nombre: "hola", 
+            tipa_Id: 1, 
+            tipa_area: "hola", 
+            ppro_Estados: "hola", 
+            usua_UsuarioCreacion: 1, 
+            usuarioCreacionNombre: "hola", 
+            ppde_FechaCreacion: new Date().toISOString(), 
+            usua_UsuarioModificacion: 1, 
+            ppde_FechaModificacion: new Date().toISOString(), 
+            usuarioModificacionNombre: "hola",
+            ppde_Estado: true,
+        }
+
+        if(saberDelete == 1)
+        {
+            try {
+                const response = await deletePedidosProduccion(productData);
+    
+                console.log("El resultado del response es: ")
+                console.log(response);
+                
+                if (response.data.data.messageStatus == 1) {
+                    const data = await getPedidosProduccion();
+                    setPedidosOrden(data);
+                    setLoading(false);
+                    isModalDelete(false)
+                  console.log('Success:', response.data);
+                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Orders Production Detail Deleted Successfully`, life: 3000 });
+                } 
+                else if(response.data.data.messageStatus == 2)
+                {
+                    isModalDelete(false)
+                    toast.current?.show({ severity: 'error', summary: 'Error', detail: `Has dependencies on other tables`, life: 3000 });
+                }
+                else {
+                    isModalDelete(false)
+                  console.error('Error:', response.statusText);
+                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                }
+              } 
+              catch (error) {
+                isModalDelete(false)
+                console.error('Error:', error);
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+              } 
+        }
+
+        else if(saberDelete == 2)
+        {
+            try {
+                const response = await sendPedidosProduccionDetalleEliminar(ppDetalle);
+    
+                console.log("El resultado del response es: ")
+                console.log(response);
+                
+                if (response.status == 200) {
+                    const data = await getPedidosProduccion();
+                    setPedidosOrden(data);
+
+                    const dataa = await getPedidosProduccionDetalle(ppro_Id);
+                    setPedidosProduccionDetalle(dataa);
+                    setLoading(false);
+
+                    isModalDelete(false)
+                  console.log('Success:', response.data);
+                  toast.current?.show({ severity: 'success', summary: 'Success', detail: `Orders Production Detail Deleted Successfully`, life: 3000 });
+                } 
+                else {
+                    isModalDelete(false)
+                  console.error('Error:', response.statusText);
+                  toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+                }
+              } 
+              catch (error) {
+                isModalDelete(false)
+                console.error('Error:', error);
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 2', life: 3000 });
+              } 
+        }
+      }
+
+      useEffect(() => {
+    }, [setPedidosOrden])
+
+    const [modalDelete, isModalDelete] = useState(false);
+
+    const ModalDelete = () => {
+        isModalDelete(true)
+    }
+
+    const handleModalAction = () => {
+        isModalDelete(false);
+    }
 
       useEffect(() => {
     }, [setRow]);
@@ -295,6 +433,7 @@ const PedidosProduccionPage = () => {
         setLabelButton("Edit");
         setSaber(2)
     } 
+    
 
     useEffect(() =>{
     }, [setDataDDL]);
@@ -330,6 +469,7 @@ const PedidosProduccionPage = () => {
     }, [setppro_Id]);
 
     const togglePanel = () => {
+        sethola(1);
         setppde_Cantidad('');
         setSelectedLotes("0");
         setlote_Stock('');
@@ -349,6 +489,9 @@ const PedidosProduccionPage = () => {
         setTable(false);
         setActiveIndex(0);  // Cambia al segundo TabPanel
     };
+
+    useEffect(() =>{
+    }, [sethola]);
 
     useEffect(() =>{
     }, [setppde_Id]);
@@ -400,6 +543,12 @@ const PedidosProduccionPage = () => {
     };
 
     const goToNextTab = () => {
+        
+        if(hola == 1)
+        {
+            setppro_Id(0);
+        }
+        console.log("Formato fecha: ", ppro_Fecha)
 
         if(ppro_Fecha == '' || ppr_Observaciones == '' || selectedEmpleados == '' || selectedEmpleados == "0")
             {
@@ -412,6 +561,9 @@ const PedidosProduccionPage = () => {
                 setActiveIndex(1);  // Cambia al segundo TabPanel
             }
     };
+
+    useEffect(() => {
+    }, [setppro_Id]);
 
     useEffect(() =>{
     }, [setActiveIndex]);
@@ -526,7 +678,7 @@ const PedidosProduccionPage = () => {
 
       //#region Table Pedidos Prod. Detalle
       const [PedidosProduccionDetalle, setPedidosProduccionDetalle] = useState([]);
-      const fetchPedidosProduccionDetalles= async (ppr_Id) => {
+      const fetchPedidosProduccionDetalles = async (ppr_Id) => {
         setLoading(true);
         try {
           const data = await getPedidosProduccionDetalle(ppr_Id);
@@ -542,8 +694,6 @@ const PedidosProduccionPage = () => {
       }, [setPedidosProduccionDetalle]);
 
       //#region Tabla de Pedidos Prod.
-      const [PedidosOrden, setPedidosOrden] = useState([]);
-      const [loading, setLoading] = useState(false);
 
       const fetchPedidosOrden= async () => {
         setLoading(true);
@@ -561,8 +711,17 @@ const PedidosProduccionPage = () => {
         fetchPedidosOrden();
       }, []);
 
+      useEffect(() =>{
+      }, [setppro_Fecha])
+
+      useEffect(() =>{
+      }, [setppr_Observaciones])
+
+      useEffect(() =>{
+      }, [setSelectedEmpleados])
+
       const EditPPD = async (rowData) => {
-        setActiveIndex(1);
+        setActiveIndex(0);
         settableppd(true);
         setIsExpanded(!isExpanded);
         setIsExpandedDetails(!isExpandedDetails);
@@ -574,9 +733,18 @@ const PedidosProduccionPage = () => {
         setlote_Stock('');
         setlote_CodigoLote('')
 
-        setppro_Fecha('');
-        setppr_Observaciones('')
-        setSelectedEmpleados("0")
+        console.log("Formato de fecha es: " + Date.parse(FechaProv).toString())
+
+        const NuevaFecha = new Date(FechaProv);
+
+        console.log("Nueva fecha: "+ NuevaFecha.toLocaleDateString('en-CA'))
+
+        setppro_Fecha(NuevaFecha.toLocaleDateString('en-CA'));                
+
+
+
+        // setppr_Observaciones('')
+        // setSelectedEmpleados("0")
 
       }
 
@@ -601,8 +769,8 @@ const PedidosProduccionPage = () => {
     // useEffect(() => {
     // }, [setlote_CodigoLote]);
 
-    // useEffect(() =>{
-    // }, [setppro_Fecha]);
+    useEffect(() =>{
+    }, [setppro_Fecha]);
 
     // useEffect(() => {
     // }, [setppr_Observaciones]);
@@ -640,6 +808,11 @@ const PedidosProduccionPage = () => {
             label: 'Details',
             icon: 'pi pi-upload',
             command: () => Details(rowData)
+          }, 
+          {
+            label: 'Delete',
+            icon: 'pi pi-upload',
+            command: () => ModalDelete()
           }
         ];
         
@@ -654,6 +827,11 @@ const PedidosProduccionPage = () => {
             label: 'Edit',
             icon: 'pi pi-upload',
             command: () => EditTable()
+          }, 
+          {
+            label: 'Delete',
+            icon: 'pi pi-upload',
+            command: () => ModalDelete()
           }
         ];
         
@@ -677,6 +855,24 @@ const PedidosProduccionPage = () => {
                     <Button color="info" label="Add" icon={mdiPlus} onClick={() => togglePanel()} />
                 )}
 
+                    <CardBoxModal
+                        title="Delete"
+                        buttonColor="info"
+                        buttonLabel="Add"
+                        isActive={modalDelete}
+                        onConfirm={handleModalAction}
+                        onCancel={handleModalAction}
+                    >
+                    
+                    <div className="text-center mb-4">
+                            <p>Are you sure you want to delete?</p>
+                            </div>
+                            <div className="flex justify-center gap-4">
+                            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={Delete}>Yes</button>
+                            <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" onClick={() => isModalDelete(false)}>No</button>
+                            </div>
+                    </CardBoxModal>
+
                     {table && (
                     <DataTable 
                     value={PedidosOrden} 
@@ -688,6 +884,7 @@ const PedidosProduccionPage = () => {
                     <Column field="ppro_Id" header="Id" sortable />
                     <Column field="empl_NombreCompleto" header="Empleado" sortable />
                     <Column field="ppro_Estados" header="Estado" sortable />
+                    <Column field="ppro_Fecha" header="Fecha" sortable />
                     <Column field="ppro_Observaciones" header="Observaciones" sortable />
                     <Column 
                     body={rowData => (
@@ -695,7 +892,11 @@ const PedidosProduccionPage = () => {
                         <Menu model={generateMenuItems(rowData)} popup ref={menuLeft} id="popup_menu_left" />
                         <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setppro_Id(rowData.ppro_Id);  menuLeft.current.toggle(event);
                           fetchPedidosProduccionDetalles(rowData.ppro_Id);
+                          setFechaProv(rowData.ppro_Fecha);
+                          setppr_Observaciones(rowData.ppro_Observaciones)
+                          setSelectedEmpleados(rowData.empl_Id)
 
+                          setsaberDelete(1)
                           setID(rowData.ppro_Id)
                           setEmpleadoss(rowData.empl_NombreCompleto);
                           setObservaciones(rowData.ppro_Observaciones);
@@ -982,7 +1183,7 @@ const PedidosProduccionPage = () => {
                     body={rowData => (
                         <div className='flex gap-3.5 justify-center'>
                         <Menu model={generateMenuItemsPPD(rowData)} popup ref={menuLeft} id="popup_menu_left" />
-                        <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setRow(rowData);  menuLeft.current.toggle(event);
+                        <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setRow(rowData);  menuLeft.current.toggle(event); setsaberDelete(2); setValorPPD(rowData.ppde_Id)
               } }small aria-controls="popup_menu_left" aria-haspopup />
                       
                        </div>
