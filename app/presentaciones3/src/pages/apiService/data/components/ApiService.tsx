@@ -560,6 +560,25 @@ export const getPedidosProduccion = async () => {
   }
 };
 
+export const sendPedidosProduccionFinalizar = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PedidosProduccion/FinalizarPedidoProduccion',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 export const sendPedidosProduccion = async (productData) => {
   try {
     const response = await axios.post(
@@ -578,6 +597,26 @@ export const sendPedidosProduccion = async (productData) => {
     throw error;
   }
 };
+
+export const sendPedidosProduccionUpdate = async (productData) => {
+  try {
+    const response = await axios.post(
+      API_URL + 'api/PedidosProduccion/Editar',
+      productData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          XApiKey: '4b567cb1c6b24b51ab55248f8e66e5cc',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending formas envio:", error);
+    throw error;
+  }
+};
+
 
 export const deletePedidosProduccion = async (productData) => {
   try {
