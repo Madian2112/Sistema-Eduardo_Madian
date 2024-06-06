@@ -77,8 +77,8 @@ const PedidosProduccionPage = () => {
 
   const validationSchema = Yup.object().shape({
       ppro_Fecha: Yup.string().required('Date is required'),
-      ppr_Observaciones: Yup.string().required('Observations are required'),
-      ppde_Cantidad: Yup.string().required('Amount are required'),
+      ppr_Observaciones: Yup.string().required('Observations are required').matches(/^[A-Za-z0-9]+$/, 'Observations should contain only letters, numbers.'),
+      ppde_Cantidad: Yup.string().required('Amount are required').matches(/^[0-9]+$/, 'Amount should contain only numbers.'),
   });
 
   const [empleados, setEmpleados] = useState([]);
@@ -912,22 +912,22 @@ const PedidosProduccionPage = () => {
       const baseItems = [
         {
           label: 'Edit',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-user-edit',
           command: () => EditPPD(rowData)
         },
         {
           label: 'Details',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-book',
           command: () => Details(rowData)
         }, 
         {
           label: 'Delete',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-trash',
           command: () => ModalDelete()
         }, 
         ...(!Finalizado ? [{
           label: 'Finish',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-send',
           command: () => isModalFinalizarT()
       }] : [])
       ];
@@ -941,12 +941,12 @@ const PedidosProduccionPage = () => {
       const baseItems = [
         {
           label: 'Edit',
-          icon: 'pi pi-upload',
+          icon: 'pi pi-user-edit',
           command: () => EditTable()
         }, 
         {
           label: 'Delete',
-          icon: 'pi pi-upload',
+          icon: 'ppi pi-trash',
           command: () => ModalDelete()
         }
       ];

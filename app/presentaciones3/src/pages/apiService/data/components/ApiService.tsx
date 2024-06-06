@@ -542,7 +542,7 @@ export const getPedidosOrden = async () => {
     }
     
     const response = await axios.get(
-      API_URL + 'api/PedidosProduccion/Listar',
+      API_URL + 'api/PedidosOrden/Listar',
       {
         headers: {
           XApiKey: apiKey,
