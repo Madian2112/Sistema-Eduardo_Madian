@@ -529,6 +529,7 @@ export const getEmpleados = async () => {
 //#endregion
 
 //#region Pedidos Produccion
+
 export const getPedidosOrden = async () => {
   console.log("Full URL:", API_URL);
   console.log("ENTRO AQUI");
@@ -541,7 +542,7 @@ export const getPedidosOrden = async () => {
     }
     
     const response = await axios.get(
-      API_URL + 'api/PedidosOrden/Listar',
+      API_URL + 'api/PedidosProduccion/Listar',
       {
         headers: {
           XApiKey: apiKey,

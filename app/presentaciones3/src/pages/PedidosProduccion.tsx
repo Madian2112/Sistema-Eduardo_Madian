@@ -126,6 +126,7 @@ const PedidosProduccionPage = () => {
         {
             if(ppde_Cantidad > DataDDL[0].lote_Stock){
                 toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
+
             }
     
             else if(ppde_Cantidad <= DataDDL[0].lote_Stock) 
