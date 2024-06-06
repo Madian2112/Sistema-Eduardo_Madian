@@ -69,6 +69,8 @@ const PedidosProduccionPage = () => {
 
     //#region ENVIAR DATOS A LA API
     const Send = async () => {
+        try 
+        {
         const productData: PedidosProduccionViewModel = {
             ppro_Id: 1,
             empl_Id: parseInt(selectedEmpleados),
@@ -124,6 +126,7 @@ const PedidosProduccionPage = () => {
         {
             if(ppde_Cantidad > DataDDL[0].lote_Stock){
                 toast.current.show({ severity: 'error', summary: 'Error', detail: `La cantidad debe ser menor o igual al stock`, life: 3000 });
+
             }
     
             else if(ppde_Cantidad <= DataDDL[0].lote_Stock) 
@@ -223,6 +226,11 @@ const PedidosProduccionPage = () => {
                       } 
                 }
             }
+        }
+        }
+        catch
+        {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Seleccine un lote', life: 3000 });
         }
       }
 
@@ -403,7 +411,6 @@ const PedidosProduccionPage = () => {
       const handleChange = (event) => {
         console.log("ID numero 1 PAIS: "+ selectedEmpleados)
         const paisId = event.target.value;
-        /*setFieldValue('pais_Id', event.target.value);*/
         setSelectedEmpleados(paisId);
       };
 

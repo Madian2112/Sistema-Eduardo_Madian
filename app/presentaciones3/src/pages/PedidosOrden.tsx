@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPaisesFalse, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendDeleteSubItemPedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -40,7 +40,7 @@ import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { Checkbox } from 'primereact/checkbox';
 import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from 'primereact/calendar';
-import { OrdenPedidosDeleteItemViewModel, OrdenPedidosDetailsSendViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
+import { OrdenPedidosDeleteItemViewModel, OrdenPedidosDeleteSubItemViewModel, OrdenPedidosDetailsSendViewModel, OrdenPedidosEnvioDetailsViewModel, OrdenPedidosEnvioViewModel, OrdenPedidosFinishViewModel } from '../interfaces/PedidoOrdenViewModel';
 import { parse } from 'path';
 import { ListBox } from 'primereact/listbox';
 import { Row } from 'primereact/row';
@@ -53,7 +53,7 @@ const toast = useRef<Toast>(null);
 //Collapse
 const [isExpanded, setIsExpanded] = useState(true);
 const [isExpandedCreate, setIsExpandedCreate] = useState(false);
-const [pais_id, setpais_id] = useState("");
+
 const [pvin_Id, setpvin_Id] = useState("");
 
 const handleModalCreate = () => {
@@ -64,12 +64,12 @@ const handleModalCreate = () => {
   Setduca_No_Duca("")
   Setpeor_Impuestos(0)
   Setciud_Id("")
-  setpais_id("")
-setSelectedPais("0")
+  setActiveIndex(0)
+  setSeletcPaises("0")
 setSelectProveedor("0")
 setSelectedProvincia("0")
   setSelectDefaultProveedor("0")
-  setSelectDefaultPaisId("0")
+
   setDefaulProvinciaId("0")
   setSelectedProvincia(null)
   Setpeor_DireccionExacta("")
@@ -112,6 +112,7 @@ const formikRef = useRef(null);
   ];
 
   const handleTabChange = async (index) => {
+    
     if (Enviado === 0) {
       if (formikRef.current) {
         const formErrors = await formikRef.current.validateForm();
@@ -239,29 +240,18 @@ useEffect(() => {
 }, [defaultProveedorId]);
 
 
-const [paises, setPaises] = useState([]);
-const [defaultPaisId, setSelectDefaultPaisId] = useState('0'); 
-const [selectedPais, setSelectedPais] = useState(null);
+
+
+const [Paises, setPaises] = useState([]);
+const [SeletcPaises, setSeletcPaises] = useState("0");
 
 useEffect(() => {
-const fetchPaises = async () => {
-  setLoadingDrop(true);
-  try {
-    const data = await getPaises();
-    setPaises(data);
-    const defaultPais = data.find(prov => prov.pais_Id === parseInt(defaultPaisId));
-    if (parseInt(defaultPaisId) != 0) {
-      setpais_id("1")
-    }
-    setSelectedPais(defaultPais);
-    setLoadingDrop(false);
-  } catch (error) {
-    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
-    setLoadingDrop(false);
-  }
-};
-fetchPaises()
-}, [defaultPaisId]);
+  const fetchPaises = async () => {
+    const data = await getPaisesFalse();
+    setPaises(data)
+  };
+  fetchPaises();
+}, []);
 
 const [ciudades, setCiudades] = useState([]);
 const [defaultCiudadId, setdefaultCiudadId] = useState('0');
@@ -294,7 +284,7 @@ const fetchProvincias = async (valor) => {
 };
 
 useEffect(() => {
-  fetchProvincias(defaultPaisId)
+  fetchProvincias(SeletcPaises)
 }, [defaultProvinciaId]);
 
 const fetchCiudades = async (valor) => {
@@ -331,26 +321,34 @@ const [loadingDrop, setLoadingDrop] = useState(false);
 
 //Impuesto
 const [checked, setChecked] = useState(false);
-
-const ValorImpuesto = () => {
-  if (checked) {
+useEffect(() => {
+  if (!checked) {
     Setpeor_Impuestos(1);
   } else {
     Setpeor_Impuestos(0);
   }
   console.log(peor_Impuestos);
+}, [checked]);
+
+const handleCheckboxChange = (e) => {
+  const isChecked = e.checked;
+  setChecked(isChecked);
 };
-
-
 //Validaciones
 const validationSchema = Yup.object().shape({
   peor_Codigo: Yup.string().required('Code is requerid'),
   prov_Id: Yup.string().required('Supplier is requerid'),
-  pvin_Id:Yup.string().required('Province is requerid'),
-  pais_Id: Yup.string().required('Country is requerid'),
-  ciud_Id: Yup.string().required('City is requerid'),
+  pvin_Id:Yup.string().required('Province is requerid')
+  .notOneOf(['0'], 'Country is required')
+  .required('Country is required'),
+  pais_Id: Yup.string()
+  .notOneOf(['0'], 'Country is required')
+  .required('Country is required'),
+  ciud_Id: Yup.string().required('City is requerid')
+  .notOneOf(['0'], 'Country is required')
+  .required('Country is required'),
   peor_DireccionExacta: Yup.string().required('Exact address is requerid'),
-  peor_FechaEntrada: Yup.string().required('Entry date is requerid'),
+  peor_FechaEntrada: Yup.date().required('Entry date is requerid'),
   peor_Obsevaciones: Yup.string().required('Observations is requerid'),
  });
 
@@ -472,7 +470,7 @@ const fetchMaterialDuca = async (Valor) => {
   }
 };
 const [ItemOMaterial, setItemOMaterial] = useState(0);
-
+const [Active, setActive] = useState(false);
 const handleInputChange = async (e) => {
 
   const count = await fetchMaterialDuca(e);
@@ -480,8 +478,10 @@ const handleInputChange = async (e) => {
   if (count > 0) {
    
     setItemOMaterial(1)
+    setActive(true)
   } else {
     setItemOMaterial(0)
+    setActive(false)
     fetchMaterial();
   }
 };
@@ -530,8 +530,8 @@ const itemTemplate = (data, setFieldValue) => {
 
 const validationSchemaDetails = Yup.object().shape({
   mate_Descripcion: Yup.string().required('Material is requerid'),
-  prod_Cantidad: Yup.string().required('Amount is requerid'),
-  prod_Precio:Yup.string().required('Price is requerid'),
+  prod_Cantidad: Yup.number().required('Amount is requerid').typeError('Should be a number'),
+  prod_Precio:Yup.number().required('Price is requerid').typeError('Should be a number'),
  });
 
  const SendDetails = async (values) => {
@@ -613,8 +613,7 @@ const GetOrdenPedidosDetalles = async (valor) => {
   }
 };
 const renderDetalles = (rowData) => {
-  console.log("EL DETALLES ES")
-  console.log(rowData)
+
   return (
     <DataTable value={rowData.detalles} responsiveLayout="scroll">
       <Column field="clie_Nombre_O_Razon_Social" header="Client Name" sortable />
@@ -622,6 +621,26 @@ const renderDetalles = (rowData) => {
       <Column field="code_SexoEvaluado" header="Sexo" sortable />
       <Column field="esti_DescripcionEvaludado" header="Descripcion" sortable />
       <Column field="orco_Id" header="Code" sortable />
+      <Column 
+          body={rowData => (
+           <div className='flex gap-3.5 justify-center'>
+             <Button color="success"  icon={mdiDetails} onClick={(event) =>{
+        console.log(rowData.ocpo_Id)
+        setocpo_Id(rowData.ocpo_Id)
+
+        setisModalDeleteSubItem(true)
+            
+
+
+      
+    
+  
+  } } />
+          
+   
+          
+           </div>
+         )} />
     </DataTable>
   );
 };
@@ -647,9 +666,9 @@ const ItemDetallesX = (ItemOMaterial) => {
   if (ItemOMaterial == 0) {
     items[0].items.push(
       {
-        label: 'Edit',
-        icon: 'pi pi-refresh',
-        command: () => console.log('Edit clicked')
+        label: 'Delete',
+        icon: 'pi pi-times',
+        command: () => setisModalDeleteActive(true)
       }
     );
   } else if (ItemOMaterial == 1) {
@@ -731,6 +750,7 @@ const [item_Id, setitem_Id] = useState(0);
 const [prod_Id, setprod_Id] = useState(0);
 const DeleteItem = async () => {
   const productData: OrdenPedidosDeleteItemViewModel = {
+    tabla:ItemOMaterial, 
     prod_Id:prod_Id,
     item_Id:item_Id
   };
@@ -754,6 +774,36 @@ const DeleteItem = async () => {
 
 
 };   
+
+
+//DELETE SUBITEMS
+const [isModalDeleteSubItem, setisModalDeleteSubItem] = useState(false);
+const [ocpo_Id, setocpo_Id] = useState(0);
+const DeleteSubItem = async () => {
+  const productData: OrdenPedidosDeleteSubItemViewModel = {
+    ocpo_Id:ocpo_Id, 
+  };
+
+
+    try {
+      const response = await sendDeleteSubItemPedidosOrden(productData);
+      if (response.status === 200) {
+        console.log('Success:', response.data);
+        GetOrdenPedidosDetalles(peor_Id)
+        setisModalDeleteSubItem(false)
+        toast.current?.show({ severity: 'success', summary: 'Success', detail: `Delete successfully`, life: 3000 });
+      } else {
+        console.error('Error:', response.statusText);
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to add product`, life: 3000 });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to add product', life: 3000 });
+    }
+
+
+};  
+
 
 //#region ADD DETAILS
 const [isModalAddDetails, setisModalAddDetails] = useState(false);
@@ -921,11 +971,20 @@ const SendSubDetails = async (values) => {
               handleInputChange(rowData.duca_No_Duca)
             }
 
-            setDefaulProvinciaId(rowData.prov_Id)
-            setSelectDefaultPaisId(rowData.pais_Id)
+            setDefaulProvinciaId(rowData.pvin_Id)
+
             setDefaulProvinciaId(rowData.pvin_Id)
             setdefaultCiudadId(rowData.ciud_Id)
             Setprov_Id(rowData.prov_Id)
+            setSelectProveedor(rowData.prov_Id);
+           
+
+            console.log(rowData.pais_Nombre)
+            console.log("QUE ONDA XD" + rowData.pais_Id)
+            console.log(rowData)
+            setSeletcPaises(rowData.pais_Id)
+            setActiveIndex(1)
+            
 
 
       
@@ -975,6 +1034,23 @@ const SendSubDetails = async (values) => {
         <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteActive(false)}>No</button>
       </div>
 </CardBoxModal>
+<CardBoxModal
+  title="delete"
+  buttonColor="info"
+  buttonLabel="Add"
+  isActive={isModalDeleteSubItem}
+  onConfirm={handleModalCreate}
+  onCancel={handleModalCreate}
+>
+
+<div className="text-center mb-4">
+        <p>Are you sure you want to delete?</p>
+      </div>
+      <div className="flex justify-center gap-4">
+        <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={DeleteSubItem}>Yes</button>
+        <button className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"  onClick={() => setisModalDeleteSubItem(false)}>No</button>
+      </div>
+</CardBoxModal>
 
 {isExpandedCreate && (
       
@@ -1007,7 +1083,7 @@ const SendSubDetails = async (values) => {
   initialValues={{
     peor_Codigo: peor_Codigo,
     prov_Id: prov_Id,
-    pais_Id: pais_id,
+    pais_Id: SeletcPaises,
     pvin_Id: pvin_Id,
     duca_No_Duca: duca_No_Duca,
     ciud_Id: ciud_Id,
@@ -1040,23 +1116,22 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
           <select
-         
-                value={selectProveedor}
-                className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
-                style={{ height: '42px', paddingTop: '0px' }}
-                onChange={(e) => {
-                  setSelectProveedor(e.target.value);
-                  setFieldValue('prov_Id', e.target.value);
-                  Setprov_Id(e.target.value);
-                }}
-            >
-                <option value="0" disabled>Select a option</option>
-                {Proveedores.map((prov) => (
-                    <option key={prov.prov_Id} value={prov.prov_Id}>
-                        {prov.prov_NombreCompania}
-                    </option>
-                ))}
-            </select>
+            value={selectProveedor}
+            className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
+            style={{ height: '42px', paddingTop: '0px' }}
+            onChange={(e) => {
+              setSelectProveedor(e.target.value);
+              setFieldValue('prov_Id', e.target.value);
+              Setprov_Id(e.target.value);
+            }}
+          >
+            <option value="0" disabled>Select a option</option>
+            {Proveedores.map((prov) => (
+              <option key={prov.prov_Id} value={prov.prov_Id}>
+                {prov.prov_NombreCompania}
+              </option>
+            ))}
+          </select>
           
           {touched.prov_Id && errors.prov_Id && <div className="text-red-500 text-xs mt-1">{errors.prov_Id.toString()}</div>}
         </div>
@@ -1083,23 +1158,22 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="name" className="mb-2">Country</label>
           <select
-                value={selectedPais}
-       
-                className={`border p-2 ${touched.pais_Id && errors.pais_Id ? 'border-red-500' : 'border-gray-300'}`}
-                style={{ height: '42px', paddingTop: '0px' }}
-                onChange={(e) => {
-                  setSelectedPais(e.target.value);
-                  setFieldValue('pais_Id', e.target.value);
-                  fetchProvincias(e.target.value);
-                }}
-            >
-                <option value="0" disabled>Select a option</option>
-                {paises.map((pais) => (
-                    <option key={pais.pais_Id} value={pais.pais_Id}>
-                        {pais.pais_Nombre}
-                    </option>
-                ))}
-            </select>
+  value={SeletcPaises} 
+  className={`border p-2 ${touched.pais_Id && errors.pais_Id ? 'border-red-500' : 'border-gray-300'}`}
+  style={{ height: '42px', paddingTop: '0px', width: '342px' }}
+  onChange={(e) => {
+    setSeletcPaises(e.target.value)
+    setFieldValue('pais_Id', e.target.value)
+    fetchProvincias(e.target.value)
+  }}
+>
+  <option value="0" disabled>Select a option</option>
+  {Paises.map((pais) => (
+    <option key={pais.pais_Id} value={pais.pais_Id}>
+      {pais.pais_Nombre}
+    </option>
+  ))}
+</select>
    
           {touched.pais_Id && errors.pais_Id && <div className="text-red-500 text-xs mt-1">{errors.pais_Id.toString()}</div>}
         </div>
@@ -1107,6 +1181,7 @@ const SendSubDetails = async (values) => {
           <label htmlFor="year" className="mb-2">Province</label>
           <select
                 value={selectedProvincia}
+              
                 onChange={(e) => {
                   setSelectedProvincia(e.target.value);
                   setFieldValue('pvin_Id', e.target.value);
@@ -1186,7 +1261,7 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col flex-1 items-center">
           <label htmlFor="impuesto" className="mb-2">Impuesto</label>
           <div className="card flex justify-center w-full">
-            <Checkbox onChange={e => { setChecked(e.checked); ValorImpuesto() }} checked={checked}></Checkbox>
+          <Checkbox onChange={handleCheckboxChange} checked={checked}></Checkbox>
           </div>
         </div>
       </div>
@@ -1264,12 +1339,14 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1 justify-between">
         <label htmlFor="name" className="mb-2">Material</label>
         <Field
+            disabled={true}
             name="mate_Descripcion"
             className={`border p-2 ${touched.mate_Descripcion && errors.mate_Descripcion ? 'border-red-500' : 'border-gray-300'}`}
           />
           {touched.mate_Descripcion && errors.mate_Descripcion && <div className="text-red-500 text-xs mt-1">{errors.mate_Descripcion}</div>}
           <label htmlFor="name" className="mb-2">Amount</label>
           <Field
+           disabled={Active}
             name="prod_Cantidad"
             onChange={(e) => {
               setFieldValue('prod_Cantidad', e.target.value);
@@ -1279,6 +1356,7 @@ const SendSubDetails = async (values) => {
           {touched.prod_Cantidad && errors.prod_Cantidad && <div className="text-red-500 text-xs mt-1">{errors.prod_Cantidad.toString()}</div>}
           <label htmlFor="name" className="mb-2">Price</label>
           <Field
+            disabled={Active}
             name="prod_Precio"
             onChange={(e) => {
               setFieldValue('prod_Precio', e.target.value);
@@ -1365,15 +1443,15 @@ const SendSubDetails = async (values) => {
     <Form className="w-full">
       <div className="flex justify-between mb-6">
         <div className="flex flex-col mr-4 flex-1">
-        <label htmlFor="name" className="mb-2">Orden Compra</label>
+        <label htmlFor="name" className="mb-2 w-full text-left">Orden Compra</label>
         <div className="card flex justify-content-center">
-            <AutoComplete field="orco_Codigo" value={SelectCompraDetalle} suggestions={filteredCode} completeMethod={search} onChange={(e) =>{ setSelectCompraDetalle(e.value), setFieldValue('orco_Id', e.value.orco_Id);; AxioFiltradoCompra(e.value.orco_Codigo)}} />
+            <AutoComplete field="orco_Codigo" value={SelectCompraDetalle}    className={`border w-46 ${touched.orco_Id && errors.orco_Id ? 'border-red-500' : 'border-gray-300'}`} suggestions={filteredCode} completeMethod={search} inputStyle={{ border: 'none' }} onChange={(e) =>{ setSelectCompraDetalle(e.value), setFieldValue('orco_Id', e.value.orco_Id);; AxioFiltradoCompra(e.value.orco_Codigo)}} />
         </div>
       
           {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
         </div>
         <div className="flex flex-col mr-4 flex-1">
-        <label htmlFor="name" className="mb-2">Orden Compra</label>
+        <label htmlFor="name" className="mb-2 mr-28">Detalle</label>
           <Dropdown
             value={SelectCompraDetalle}
             onChange={(e) => {
@@ -1384,14 +1462,14 @@ const SendSubDetails = async (values) => {
             options={CompraDetalleFiltrado}
             optionLabel="esti_Descripcion"
             placeholder="Select a option"
-            className={`border p-2 ${touched.code_Id && errors.code_Id ? 'border-red-500' : 'border-gray-300'}`}
+            className={`border p-2 w-46 ${touched.code_Id && errors.code_Id ? 'border-red-500' : 'border-gray-300'}`}
             style={{ height: '42px', paddingTop: '0px' }}
           />
           {touched.orco_Id && errors.orco_Id && <div className="text-red-500 text-xs mt-1">{errors.orco_Id}</div>}
         </div>
     
       </div>
-      <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6">
+      <div className="flex flex-row flex-grow-2 gap-2 align-items-center mt-6 justify-end">
             <button
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
