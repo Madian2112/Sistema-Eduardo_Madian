@@ -410,7 +410,6 @@ const PedidosProduccionPage = () => {
       const handleChange = (event) => {
         console.log("ID numero 1 PAIS: "+ selectedEmpleados)
         const paisId = event.target.value;
-        /*setFieldValue('pais_Id', event.target.value);*/
         setSelectedEmpleados(paisId);
       };
 

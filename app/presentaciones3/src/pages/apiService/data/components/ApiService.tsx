@@ -292,6 +292,35 @@ export const getPaises = async () => {
     return [];
   }
 };
+export const getPaisesFalse = async () => {
+  console.log("Full URL:", API_URL);
+  console.log("ENTRO AQUI");
+  try {
+    const apiKey = "4b567cb1c6b24b51ab55248f8e66e5cc";
+
+    if (!apiKey) {
+      console.error('API key is undefined.');
+      return [];
+    }
+    
+    const response = await axios.get(
+      API_URL + 'api/Paises/Listar?pais_EsAduana=false',
+      {
+        headers: {
+          XApiKey: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data.data);
+    const data = await response.data.data ;
+ 
+    return data;
+  } catch (error) {
+    console.error("Error fetching formas envio:", error);
+    return [];
+  }
+};
 //#endregion
 
 //#region PROVINCIAS
