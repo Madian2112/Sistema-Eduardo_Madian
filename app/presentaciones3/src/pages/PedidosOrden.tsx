@@ -27,7 +27,7 @@ import * as Yup from 'yup';
 import { ProductViewModel } from '../interfaces/telefonoViewModel'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPaisesFalse, getPedidosOrden, getPedidosOrdenDetalles, getProveedores, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendDeleteSubItemPedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
+import { getCiudadesPorProvincias, getCompraDetalle, getCompraDetalleFiltrado, getFormasEnvio, getMaterial, getMaterialItems, getPaises, getPaisesFalse, getPedidosOrden, getPedidosOrdenDetalles, getPedidosOrdenEdu, getProveedores, getProvincias, getProvinciasPorPaises, sendDeleteFormasEnvio, sendDeleteItemPedidosOrden, sendDeletePedidosOrden, sendDeleteSubItemPedidosOrden, sendEditFormasEnvio, sendFormasEnvio, sendItemPedidosOrdenDetalles, sendPedidosOrden, sendPedidosOrdenDetalles, sendPedidosOrdenEdit, sendPedidosOrdenSubItems } from './apiService/data/components/ApiService';
 import { FormasEnvioViewModel } from '../interfaces/FormasEnvioViewModel';
 import { Menu } from 'primereact/menu';
 import { TabMenu } from 'primereact/tabmenu';
@@ -54,7 +54,7 @@ const toast = useRef<Toast>(null);
 const [isExpanded, setIsExpanded] = useState(true);
 const [isExpandedCreate, setIsExpandedCreate] = useState(false);
 
-const [pvin_Id, setpvin_Id] = useState("");
+
 
 const handleModalCreate = () => {
   EditOrCreate("Create")
@@ -63,15 +63,12 @@ const handleModalCreate = () => {
   Setpeor_Codigo("")
   Setduca_No_Duca("")
   Setpeor_Impuestos(0)
-  Setciud_Id("")
+
   setActiveIndex(0)
   setSeletcPaises("0")
-setSelectProveedor("0")
-setSelectedProvincia("0")
-  setSelectDefaultProveedor("0")
-
-  setDefaulProvinciaId("0")
-  setSelectedProvincia(null)
+  setSeletcProveedores("0")
+  setSeletcProvincias("0")
+  setSeletcCiudades("0")
   Setpeor_DireccionExacta("")
   Setpeor_FechaEntrada("")
   Setpeor_Obsevaciones("")
@@ -157,7 +154,7 @@ const [loading, setLoading] = useState(false);
 const GetOrdenPedidos = async () => {
   setLoading(true);
   try {
-    const data = await getPedidosOrden();
+    const data = await getPedidosOrdenEdu();
     setGetPedidosOrden(data);
     setLoading(false);
   } catch (error) {
@@ -205,8 +202,8 @@ const generateMenuItems = (rowData) => {
 //Variables
 const [peor_Id, Setpeor_Id] = useState(0);
 const [peor_Codigo, Setpeor_Codigo] = useState('');
-const [prov_Id, Setprov_Id] = useState('');
-const [ciud_Id, Setciud_Id] = useState('');
+
+
 const [duca_No_Duca, Setduca_No_Duca] = useState('');
 const [peor_DireccionExacta, Setpeor_DireccionExacta] = useState('');
 const [peor_FechaEntrada, Setpeor_FechaEntrada] = useState(null);
@@ -214,32 +211,18 @@ const [peor_Obsevaciones, Setpeor_Obsevaciones] = useState('');
 const [peor_Impuestos, Setpeor_Impuestos] = useState(0);
 
 //DropDowns
+
+
 const [Proveedores, setProveedores] = useState([]);
-const [defaultProveedorId, setSelectDefaultProveedor] = useState('0'); 
-const [selectProveedor, setSelectProveedor] = useState(null);
+const [SeletcProveedores, setSeletcProveedores] = useState("0");
 
 useEffect(() => {
-    const fetchProveedores = async () => {
-        setLoadingDrop(true);
-        try {
-            const data = await getProveedores();
-            setProveedores(data);
-            const defaultProveedor = data.find(prov => prov.prov_Id === parseInt(defaultProveedorId));
-            if (parseInt(defaultProveedorId) != 0 ) {
-              Setprov_Id("1")
-            }
-            setSelectProveedor(defaultProveedor);
-            setLoadingDrop(false);
-        } catch (error) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch proveedores', life: 3000 });
-            setLoadingDrop(false);
-        }
-    };
-
-    fetchProveedores();
-}, [defaultProveedorId]);
-
-
+  const fetchProveedores = async () => {
+    const data = await getProveedores();
+    setProveedores(data)
+  };
+  fetchProveedores();
+}, []);
 
 
 const [Paises, setPaises] = useState([]);
@@ -253,59 +236,37 @@ useEffect(() => {
   fetchPaises();
 }, []);
 
-const [ciudades, setCiudades] = useState([]);
-const [defaultCiudadId, setdefaultCiudadId] = useState('0');
-const [selectedCiudad, setSelectedCiudad] = useState(null);
 
 
-const [provincias, setProvincias] = useState([]);
-const [defaultProvinciaId, setDefaulProvinciaId] = useState('0');
-const [selectedProvincia, setSelectedProvincia] = useState(null);
-
+const [Provincias, setProvincias] = useState([]);
+const [SeletcProvincias, setSeletcProvincias] = useState("0");
 
 const fetchProvincias = async (valor) => {
-  setLoadingDrop(true);
-  try {
-      if (valor) {
-        setCiudades([]);
-        console.log(valor)
-        const data = await getProvinciasPorPaises(valor);
-        setProvincias(data);
-        const defaultProvin = data.find(prov => prov.pvin_Id === parseInt(defaultProvinciaId));
-        if (parseInt(defaultProvinciaId) != 0 ) {
-          setpvin_Id("1")
-        }
-        setSelectProveedor(defaultProvin);
-      }
-  } catch (error) {
-    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch paises', life: 3000 });
-    setLoadingDrop(false);
-  }
+  const data = await getProvinciasPorPaises(valor);
+  setProvincias(data)
 };
+
 
 useEffect(() => {
   fetchProvincias(SeletcPaises)
-}, [defaultProvinciaId]);
+}, [SeletcPaises]);
+
+
+
+const [Ciudades, setCiudades] = useState([]);
+const [SeletcCiudades, setSeletcCiudades] = useState("0");
+
 
 const fetchCiudades = async (valor) => {
-  if (valor) {
-    const data = await getCiudadesPorProvincias(valor);
-    setCiudades(data);
-    const defaultCiudad = data.find(prov => prov.ciud_Id === parseInt(defaultCiudadId));
-    if (parseInt(defaultCiudadId) != 0 ) {
-      Setciud_Id("1")
-    }
-    setSelectedCiudad(defaultCiudad);
-  }
-  else {
-    setCiudades([]);
-    console.log("La provincia no tenia ciuadad");
-  }
+  const data = await getCiudadesPorProvincias(valor);
+  setCiudades(data)
 };
 
+
+
 useEffect(() => {
-  fetchCiudades(defaultProvinciaId)
-}, [defaultCiudadId]);
+  fetchCiudades(SeletcProvincias)
+}, [SeletcProvincias]);
 const [loadingDrop, setLoadingDrop] = useState(false);
 
 
@@ -337,16 +298,18 @@ const handleCheckboxChange = (e) => {
 //Validaciones
 const validationSchema = Yup.object().shape({
   peor_Codigo: Yup.string().required('Code is requerid'),
-  prov_Id: Yup.string().required('Supplier is requerid'),
+  prov_Id: Yup.string().required('Supplier is requerid')
+  .notOneOf(['0'], 'Supplier is required')
+  .required('Supplier is required'),
   pvin_Id:Yup.string().required('Province is requerid')
-  .notOneOf(['0'], 'Country is required')
-  .required('Country is required'),
+  .notOneOf(['0'], 'Province is required')
+  .required('Province is required'),
   pais_Id: Yup.string()
   .notOneOf(['0'], 'Country is required')
   .required('Country is required'),
   ciud_Id: Yup.string().required('City is requerid')
-  .notOneOf(['0'], 'Country is required')
-  .required('Country is required'),
+  .notOneOf(['0'], 'City is required')
+  .required('City is required'),
   peor_DireccionExacta: Yup.string().required('Exact address is requerid'),
   peor_FechaEntrada: Yup.date().required('Entry date is requerid'),
   peor_Obsevaciones: Yup.string().required('Observations is requerid'),
@@ -359,9 +322,9 @@ const Send = async () => {
   const productData: OrdenPedidosEnvioViewModel = {
     peor_Id:peor_Id,
     peor_Codigo: peor_Codigo,
-    prov_Id:parseFloat(prov_Id),
+    prov_Id:parseFloat(SeletcProveedores),
     duca_No_Duca: duca_No_Duca,
-    ciud_Id:parseFloat(ciud_Id),
+    ciud_Id:parseFloat(SeletcCiudades),
     peor_DireccionExacta: peor_DireccionExacta,
     peor_FechaEntrada: peor_FechaEntrada,
     peor_Impuestos: peor_Impuestos,
@@ -624,7 +587,7 @@ const renderDetalles = (rowData) => {
       <Column 
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
-             <Button color="success"  icon={mdiDetails} onClick={(event) =>{
+             <Button color="success"  icon={mdiDelete} onClick={(event) =>{
         console.log(rowData.ocpo_Id)
         setocpo_Id(rowData.ocpo_Id)
 
@@ -669,7 +632,7 @@ const ItemDetallesX = (ItemOMaterial) => {
     items[0].items.push(
       {
         label: 'Delete',
-        icon: 'pi pi-times',
+        icon: 'pi pi-trash',
         command: () => setisModalDeleteActive(true)
       }
     );
@@ -677,7 +640,7 @@ const ItemDetallesX = (ItemOMaterial) => {
     items[0].items.push(
       {
         label: 'Delete',
-        icon: 'pi pi-times',
+        icon: 'pi pi-trash',
         command: () => setisModalDeleteActive(true)
       }
     );
@@ -710,8 +673,6 @@ const togglePanel = (EcoEnvio) => {
 const togglePanelDetails = () => {
   setIsExpanded(!isExpanded);
   Setpeor_Codigo("")
-  Setprov_Id("")
-  Setciud_Id("")
   Setpeor_DireccionExacta("")
   Setpeor_FechaEntrada("")
   Setpeor_Obsevaciones("")
@@ -966,8 +927,7 @@ const SendSubDetails = async (values) => {
        
             //Editado
             Setpeor_Id(rowData.peor_Id)
-            Setciud_Id(rowData.ciud_Id)
-         
+
             sendDeleteFormasEnvio
 
             GetOrdenPedidosDetalles(rowData.peor_Id)
@@ -975,18 +935,18 @@ const SendSubDetails = async (values) => {
               handleInputChange(rowData.duca_No_Duca)
             }
 
-            setDefaulProvinciaId(rowData.pvin_Id)
+   
 
-            setDefaulProvinciaId(rowData.pvin_Id)
-            setdefaultCiudadId(rowData.ciud_Id)
-            Setprov_Id(rowData.prov_Id)
-            setSelectProveedor(rowData.prov_Id);
+         
            
 
             console.log(rowData.pais_Nombre)
             console.log("QUE ONDA XD" + rowData.pais_Id)
             console.log(rowData)
+            setSeletcProveedores(rowData.prov_Id)
             setSeletcPaises(rowData.pais_Id)
+            setSeletcProvincias(rowData.pvin_Id)
+            setSeletcCiudades(rowData.ciud_Id)
             setActiveIndex(1)
             
 
@@ -1086,11 +1046,11 @@ const SendSubDetails = async (values) => {
     innerRef={formikRef}
   initialValues={{
     peor_Codigo: peor_Codigo,
-    prov_Id: prov_Id,
+    prov_Id: SeletcProveedores,
     pais_Id: SeletcPaises,
-    pvin_Id: pvin_Id,
+    pvin_Id: SeletcProvincias,
     duca_No_Duca: duca_No_Duca,
-    ciud_Id: ciud_Id,
+    ciud_Id: SeletcCiudades,
     peor_DireccionExacta: peor_DireccionExacta,
     peor_FechaEntrada: peor_FechaEntrada,
     peor_Obsevaciones: peor_Obsevaciones,
@@ -1120,13 +1080,12 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Proveedor</label>
           <select
-            value={selectProveedor}
+            value={SeletcProveedores}
             className={`border p-2 ${touched.prov_Id && errors.prov_Id ? 'border-red-500' : 'border-gray-300'}`}
             style={{ height: '42px', paddingTop: '0px' }}
             onChange={(e) => {
-              setSelectProveedor(e.target.value);
+              setSeletcProveedores(e.target.value);
               setFieldValue('prov_Id', e.target.value);
-              Setprov_Id(e.target.value);
             }}
           >
             <option value="0" disabled>Select a option</option>
@@ -1168,7 +1127,7 @@ const SendSubDetails = async (values) => {
   onChange={(e) => {
     setSeletcPaises(e.target.value)
     setFieldValue('pais_Id', e.target.value)
-    fetchProvincias(e.target.value)
+    setSeletcProvincias("0")
   }}
 >
   <option value="0" disabled>Select a option</option>
@@ -1184,18 +1143,19 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col mr-4 flex-1">
           <label htmlFor="year" className="mb-2">Province</label>
           <select
-                value={selectedProvincia}
+                value={SeletcProvincias}
               
                 onChange={(e) => {
-                  setSelectedProvincia(e.target.value);
+                  setSeletcProvincias(e.target.value);
                   setFieldValue('pvin_Id', e.target.value);
-                  fetchCiudades(e.target.value);
+                  setSeletcCiudades("0");
+
                 }}
                 className={`border p-2 ${touched.pvin_Id && errors.pvin_Id ? 'border-red-500' : 'border-gray-300'}`}
                 style={{ height: '42px', paddingTop: '0px' }}
             >
-                <option value="" disabled>Select a option</option>
-                {provincias.map((prov) => (
+                <option value="0" disabled>Select a option</option>
+                {Provincias.map((prov) => (
                     <option key={prov.pvin_Id} value={prov.pvin_Id}>
                         {prov.pvin_Nombre}
                     </option>
@@ -1206,17 +1166,16 @@ const SendSubDetails = async (values) => {
         <div className="flex flex-col flex-1">
           <label htmlFor="year" className="mb-2">City</label>
           <select
-                value={selectedCiudad}
+                value={SeletcCiudades}
                 onChange={(e) => {
-                  setSelectedCiudad(e.target.value);
+                  setSeletcCiudades(e.target.value);
                   setFieldValue('ciud_Id', e.target.value);
-                  Setciud_Id(e.target.value);
                 }}
                 className={`border p-2 ${touched.ciud_Id && errors.ciud_Id ? 'border-red-500' : 'border-gray-300'}`}
                 style={{ height: '42px', paddingTop: '0px' }}
             >
-                <option value="" disabled>Select a option</option>
-                {ciudades.map((ciud) => (
+                <option value="0" disabled>Select a option</option>
+                {Ciudades.map((ciud) => (
                     <option key={ciud.ciud_Id} value={ciud.ciud_Id}>
                         {ciud.ciud_Nombre}
                     </option>
@@ -1288,7 +1247,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos(); setActiveIndex(0);}}
+              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos()}}
             >
               Leave
             </button>
@@ -1377,7 +1336,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos();setActiveIndex(0);}}
+              onClick={() => {handleModalCreateLeave(); GetOrdenPedidos()}}
             >
               Leave
             </button>
@@ -1441,6 +1400,8 @@ const SendSubDetails = async (values) => {
   onSubmit={(values, { setSubmitting }) => {
     setSubmitting(false);
     SendSubDetails(values);
+    values.code_Id = "";
+    values.orco_Id = "";
   }}
 >
   {({ errors, touched, setFieldValue }) => (
@@ -1478,7 +1439,7 @@ const SendSubDetails = async (values) => {
               type="button"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               style={{ height: '44px' }}
-              onClick={() => {setisModalAddDetails(false); }}
+              onClick={() => {setisModalAddDetails(false)}}
             >
               Leave
             </button>
