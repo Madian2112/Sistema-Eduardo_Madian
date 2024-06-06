@@ -34,6 +34,7 @@ const EcoTasaPage = () => {
      const [isModalDelete, setisModalDeleteActive] = useState(false);
      const [isCollapse, setCollapse] = useState(false);
      const toast = useRef<Toast>(null);
+     
      const handleModalAction = () => {
       
        setIsModalInfoActive(false);
@@ -179,6 +180,9 @@ const EcoTasaPage = () => {
       setPagar(EcoEnvio.ecot_CantidadPagar)
        setisModalDeleteActive(true);
      };
+
+
+
      const Delete = async () => {
       const productData: EcoTasaEnvioViewModel = {
         ecot_Id:parseFloat(id),
@@ -345,7 +349,8 @@ const EcoTasaPage = () => {
          </div>
    </CardBoxModal>
          </SectionMain>
-          )}
+          )
+          }
                {isExpandedDetails && (
          <SectionMain>
            <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Formas Envio" main>

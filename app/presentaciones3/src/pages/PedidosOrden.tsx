@@ -174,7 +174,7 @@ const generateMenuItems = (rowData) => {
   const baseItems = [
     {
       label: 'Details',
-      icon: 'pi pi-upload',
+      icon: 'pi pi-book',
       command: () => togglePanel(rowData)
     }
   ];
@@ -183,12 +183,12 @@ const generateMenuItems = (rowData) => {
     baseItems.push(
       {
         label: 'Edit',
-        icon: 'pi pi-refresh',
+        icon: 'pi pi-user-edit',
         command: () => handleModalEdit(rowData)
       },
       {
         label: 'Finish',
-        icon: 'pi pi-upload',
+        icon: 'pi pi-send',
         command: () => setisModalFinishActive(true)
       }
     );
@@ -612,6 +612,7 @@ useEffect(() => {
   GetOrdenPedidosDetalles(peor_Codigo);
 }, []); 
 const menuLeftDetalles = useRef(null);
+
 const ItemDetallesX = (ItemOMaterial) => {
   const items = [
     {
@@ -627,6 +628,7 @@ const ItemDetallesX = (ItemOMaterial) => {
   ];
 
   if (ItemOMaterial == 0) {
+
     items[0].items.push(
       {
         label: 'Delete',
@@ -662,6 +664,7 @@ const [FechaCreacion, setFechaCreacion] = useState("");
 const [FechaModificacion, setFechaFechaModificacion] = useState("");
 const [UsuarioCreacion, setUsuarioCreacion] = useState("");
 const [UsuarioModificacion, setUsuarioModificacion] = useState("");
+
 const togglePanel = (EcoEnvio) => {
   setIsExpanded(!isExpanded);
   setIsExpandedDetails(!isExpandedDetails);
@@ -898,8 +901,9 @@ const SendSubDetails = async (values) => {
           body={rowData => (
            <div className='flex gap-3.5 justify-center'>
             <Menu model={generateMenuItems(rowData)} popup ref={menuLeft} id="popup_menu_left" />
-            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{setPrueba(rowData.peor_finalizacion);  menuLeft.current.toggle(event);
+            <Button color="success" label="Options" icon={mdiDetails} onClick={(event) =>{ setPrueba(rowData.peor_finalizacion);  menuLeft.current.toggle(event);
             Setpeor_Codigo(rowData.peor_Codigo);  setproveedor(rowData.prov_NombreCompania); 
+            
             Setduca_No_Duca("Vacio");
             Setpeor_Impuestos(0);
             if (rowData.duca_No_Duca != null) {

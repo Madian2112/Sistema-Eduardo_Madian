@@ -27,6 +27,10 @@ body,
   overflow: hidden;
 }
 
+.p-tabview-nav {
+  justify-content: center !important;
+}
+
 .Infinite {
   flex: 1;
 }
