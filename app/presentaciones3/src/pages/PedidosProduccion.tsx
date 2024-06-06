@@ -190,6 +190,7 @@ const PedidosProduccionPage = () => {
                                 } catch (error) {
                                   console.error('Error:', error);
                                   toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Entro al catch 1', life: 3000 });
+
                                 }
                           }
           
